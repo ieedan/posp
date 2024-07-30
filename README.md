@@ -69,6 +69,8 @@ Allows `//` and `/**/` style comments.
 
 ## Usage
 
+Write your program.
+
 ```rs
 use std::fs;
 
@@ -77,7 +79,7 @@ use json::parser::{error::Error, Options, Parser, Value};
 fn main() -> Result<(), Error> {
     let source: String = fs::read_to_string("test.json").unwrap();
 
-    let mut parser: Parser = Parser::new(source, Options::default());
+    let mut parser: Parser = Parser::new(source, Options::js());
 
     let result: Value =  parser.parse()?;
 
@@ -85,4 +87,23 @@ fn main() -> Result<(), Error> {
 
     Ok(())
 }
+```
+
+Add content to `test.json`.
+
+```json
+/* This is a json object */
+{
+	"key": "value",
+	"stuff": [
+		{
+			"name": "something"
+		}
+	]
+}
+```
+
+Run to get the ast
+```
+cargo run
 ```
