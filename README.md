@@ -7,7 +7,7 @@ posp (Piece of \*\*\*\* parsers). These are parser implementations never meant t
 
 # json `./json`
 
-A customizable recursive decent parser for JSON. Based on the [ECMA JSON standard](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+A customizable recursive descent parser for JSON. Based on the [ECMA JSON standard](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
 
 ## Grammar
 
