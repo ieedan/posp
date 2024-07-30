@@ -1,8 +1,8 @@
-# POSP
+# posp
 
-POSP (Piece of \*\*\*\* parsers). These are parser implementations never meant to see production but help me practice creating parsers.
+posp (Piece of \*\*\*\* parsers). These are parser implementations never meant to see production but help me practice creating parsers.
 
-> ![WARNING]
+> [!WARNING]
 > These are just for practice and not to be used in production.
 
 # Parsers
