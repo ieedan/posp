@@ -109,35 +109,75 @@ impl Scanner {
                         )));
                     }
                 }
-                b'"' => {
-                    let start_line = self.line;
-                    let start_column = self.column;
-                    self.advance(1);
-
-                    // handles escaped '"'
-                    while !(self.peek() == b'"' && self.peek_last() != b'\'') && !self.is_at_end() {
+                b'"' | b'\'' => {
+                    if c == b'"' {
+                        let start_line = self.line;
+                        let start_column = self.column;
                         self.advance(1);
-                    }
 
-                    if self.is_at_end() {
+                        // handles escaped '"'
+                        while !(self.peek() == b'"' && self.peek_last() != b'\\')
+                            && !self.is_at_end()
+                        {
+                            self.advance(1);
+                        }
+
+                        if self.is_at_end() {
+                            return Err(Error::SyntaxError(format!(
+                                "{}:{} Unclosed '\"'",
+                                start_line, start_column
+                            )));
+                        }
+
+                        let result = self.source[self.start + 1..self.current].to_string();
+
+                        // go past char
+                        self.advance(1);
+
+                        self.tokens.push(Token {
+                            typ: TokenType::String,
+                            column: start_column,
+                            line: start_line,
+                            lexeme: self.source[self.start..self.current].to_string(),
+                            literal: Some(Literal::String(result)),
+                        });
+                    } else if c == b'\'' && self.options.allow_single_quotes {
+                        let start_line = self.line;
+                        let start_column = self.column;
+                        self.advance(1);
+
+                        // handles escaped "'"
+                        while !(self.peek() == b'\'' && self.peek_last() != b'\\')
+                            && !self.is_at_end()
+                        {
+                            self.advance(1);
+                        }
+
+                        if self.is_at_end() {
+                            return Err(Error::SyntaxError(format!(
+                                "{}:{} Unclosed \"'\"",
+                                start_line, start_column
+                            )));
+                        }
+
+                        let result = self.source[self.start + 1..self.current].to_string();
+
+                        // go past char
+                        self.advance(1);
+
+                        self.tokens.push(Token {
+                            typ: TokenType::String,
+                            column: start_column,
+                            line: start_line,
+                            lexeme: self.source[self.start..self.current].to_string(),
+                            literal: Some(Literal::String(result)),
+                        });
+                    } else {
                         return Err(Error::SyntaxError(format!(
-                            "{}:{} Unclosed '\"'",
-                            start_line, start_column
+                            "Unexpected token '{}' at {}:{}.",
+                            *&c as char, self.line, self.column
                         )));
                     }
-
-                    let result = self.source[self.start + 1..self.current].to_string();
-
-                    // go past char
-                    self.advance(1);
-
-                    self.tokens.push(Token {
-                        typ: TokenType::String,
-                        column: start_column,
-                        line: start_line,
-                        lexeme: self.source[self.start..self.current].to_string(),
-                        literal: Some(Literal::String(result)),
-                    });
                 }
                 b'\n' => self.new_line(),
                 // skip whitespace

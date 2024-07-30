@@ -1,3 +1,5 @@
+/* Using Options::js() will allow this to be parsed normally. */
 {
-    "welcome": -1.75e10
+    foo: -1.75e10,
+    bar: 'hello world',
 }

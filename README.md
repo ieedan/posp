@@ -37,6 +37,18 @@ Allows keys in objects to be unquoted like is valid in JavaScript.
 }
 ```
 
+### `allow_single_quotes`
+
+Allows single quotes like is valid in JavaScript.
+
+<!-- Don't put json / js as a lang here it will format incorrectly -->
+
+```js
+{
+  'foo': 'bar',
+}
+```
+
 ### `allow_trailing_comma`
 
 Allows trailing commas in objects and arrays.
@@ -91,15 +103,11 @@ fn main() -> Result<(), Error> {
 
 Add content to `test.json`.
 
-```json
-/* This is a json object */
+```js
+/* Using Options::js() will make allow this to be parsed */
 {
-  "key": "value",
-  "stuff": [
-    {
-      "name": "something"
-    }
-  ]
+    hello: 'world',
+    things: ['one', 'two', 'three'],
 }
 ```
 

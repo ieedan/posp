@@ -32,6 +32,15 @@ pub struct Options {
     /// }
     /// ```
     pub allow_trailing_comma: bool,
+    /// Allows single quote strings as in JavaScript.
+    ///
+    /// # Example
+    /// ```json
+    /// {
+    ///    'foo': 'bar',
+    /// }
+    /// ```
+    pub allow_single_quotes: bool,
     /// Allows comments such as in JavaScript
     ///
     /// # Example
@@ -73,11 +82,13 @@ impl Options {
     pub fn new(
         allow_unquoted_identifier: bool,
         allow_trailing_comma: bool,
+        allow_single_quotes: bool,
         allow_comments: bool,
         tab_width: usize,
     ) -> Self {
         Self {
             allow_unquoted_identifier,
+            allow_single_quotes,
             allow_trailing_comma,
             allow_comments,
             tab_width,
@@ -89,6 +100,7 @@ impl Options {
     /// ```
     /// {
     ///   allow_unquoted_identifier: false,
+    ///   allow_single_quotes: false,
     ///   allow_trailing_comma: false,
     ///   allow_comments: false,
     ///   tab_width: 4,
@@ -97,6 +109,7 @@ impl Options {
     pub fn default() -> Self {
         Self {
             allow_unquoted_identifier: false,
+            allow_single_quotes: false,
             allow_trailing_comma: false,
             allow_comments: false,
             tab_width: 4,
@@ -108,6 +121,7 @@ impl Options {
     /// ```
     /// {
     ///   allow_unquoted_identifier: true,
+    ///   allow_single_quotes: true,
     ///   allow_trailing_comma: true,
     ///   allow_comments: true,
     ///   tab_width: 4,
@@ -116,6 +130,7 @@ impl Options {
     pub fn js() -> Self {
         Self {
             allow_unquoted_identifier: true,
+            allow_single_quotes: true,
             allow_trailing_comma: true,
             allow_comments: true,
             tab_width: 4,
@@ -197,11 +212,7 @@ impl Parser {
 
         if had_comma {
             if self.options.allow_trailing_comma {
-                // this shouldn't happen
-                self.consume(
-                    TokenType::Comma,
-                    "Something went wrong while parsing.".to_string(),
-                )?;
+                // do nothing it has already been consumed
             } else {
                 return Err(Error::SyntaxError(
                     "Trailing commas are not allowed.".to_string(),
@@ -255,11 +266,7 @@ impl Parser {
 
         if had_comma {
             if self.options.allow_trailing_comma {
-                // this shouldn't happen
-                self.consume(
-                    TokenType::Comma,
-                    "Something went wrong while parsing.".to_string(),
-                )?;
+                // do nothing its already been consumed
             } else {
                 return Err(Error::SyntaxError(
                     "Trailing commas are not allowed.".to_string(),
