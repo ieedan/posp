@@ -5,13 +5,11 @@ posp (Piece of \*\*\*\* parsers). These are parser implementations never meant t
 > [!WARNING]
 > These are just for practice and not to be used in production.
 
-# Parsers
-
-## json `./json`
+# json `./json`
 
 A customizable recursive decent parser for JSON. Based on the [ECMA JSON standard](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
 
-### Grammar
+## Grammar
 
 The following grammar syntax is based on the grammar syntax used in [Crafting Interpreters](https://craftinginterpreters.com/).
 
@@ -23,11 +21,11 @@ property  ->  identifier ":" (object | literal) ","?
 literal   ->  string | number | "true" | "false"| "null"
 ```
 
-### Options
+## Options
 
 The parser has some options for how it parses JSON.
 
-#### `allow_unquoted_identifier`
+### `allow_unquoted_identifier`
 
 Allows keys in objects to be unquoted like is valid in JavaScript.
 
@@ -39,7 +37,7 @@ Allows keys in objects to be unquoted like is valid in JavaScript.
 }
 ```
 
-#### `allow_trailing_comma`
+### `allow_trailing_comma`
 
 Allows trailing commas in objects and arrays.
 
@@ -51,7 +49,7 @@ Allows trailing commas in objects and arrays.
 }
 ```
 
-#### `allow_comments`
+### `allow_comments`
 
 Allows `//` and `/**/` style comments.
 
@@ -69,7 +67,7 @@ Allows `//` and `/**/` style comments.
 }
 ```
 
-### Usage
+## Usage
 
 ```rs
 use std::fs;
