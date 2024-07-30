@@ -14,7 +14,7 @@ A customizable recursive decent parser for JSON. Based on the [ECMA JSON standar
 The following grammar syntax is based on the grammar syntax used in [Crafting Interpreters](https://craftinginterpreters.com/).
 
 ```
-value      ->  object | array | literal
+value     ->  object | array | literal
 object    ->  "{" property* "}"
 array     ->  "[" value* "]"
 property  ->  identifier ":" (object | literal) ","?
@@ -33,7 +33,7 @@ Allows keys in objects to be unquoted like is valid in JavaScript.
 
 ```
 {
-	foo: "bar"
+  foo: "bar"
 }
 ```
 
@@ -45,7 +45,7 @@ Allows trailing commas in objects and arrays.
 
 ```
 {
-	"foo": ["bar", "bar", "bar",],
+  "foo": ["bar", "bar", "bar",],
 }
 ```
 
@@ -55,15 +55,15 @@ Allows `//` and `/**/` style comments.
 
 ```json
 {
-	// foo bar
-	"foo": "bar"
+  // foo bar
+  "foo": "bar"
 }
 ```
 
 ```json
 {
-	/* foo bar */
-	"foo": "bar"
+  /* foo bar */
+  "foo": "bar"
 }
 ```
 
@@ -94,16 +94,17 @@ Add content to `test.json`.
 ```json
 /* This is a json object */
 {
-	"key": "value",
-	"stuff": [
-		{
-			"name": "something"
-		}
-	]
+  "key": "value",
+  "stuff": [
+    {
+      "name": "something"
+    }
+  ]
 }
 ```
 
 Run to get the ast
+
 ```
 cargo run
 ```
