@@ -154,19 +154,21 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn new(source: String, options: Options) -> Self {
+    pub fn new(options: Options) -> Self {
         Self {
-            source,
+            source: String::new(),
             tokens: vec![],
             options,
             current: 0,
         }
     }
 
-    pub fn parse(&mut self) -> Result<Value, Error> {
-        let mut scanner = Scanner::new(self.source.clone(), self.options.clone());
+    pub fn parse(&mut self, source: String) -> Result<Value, Error> {
+        self.source = source;
 
-        self.tokens = scanner.scan()?;
+        let mut scanner = Scanner::new(&self.options);
+
+        self.tokens = scanner.scan(self.source.clone())?;
 
         self.value()
     }

@@ -5,20 +5,20 @@ use super::{
     Options,
 };
 
-pub struct Scanner {
+pub struct Scanner<'a> {
     source: String,
     tokens: Vec<Token>,
     current: usize,
     line: usize,
     column: usize,
     start: usize,
-    options: Options,
+    options: &'a Options,
 }
 
-impl Scanner {
-    pub fn new(source: String, options: Options) -> Self {
+impl<'a> Scanner<'a> {
+    pub fn new(options: &'a Options) -> Self {
         Self {
-            source,
+            source: String::new(),
             current: 0,
             line: 1,
             column: 1,
@@ -28,7 +28,9 @@ impl Scanner {
         }
     }
 
-    pub fn scan(&mut self) -> Result<Vec<Token>, Error> {
+    pub fn scan(&mut self, source: String) -> Result<Vec<Token>, Error> {
+        self.source = source;
+
         let keywords = keywords();
 
         while !self.is_at_end() {
