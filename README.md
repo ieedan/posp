@@ -11,7 +11,7 @@ A customizable recursive decent parser for JSON. Based on the [ECMA JSON standar
 
 ## Grammar
 
-The following grammar syntax is based on the grammar syntax used in [Crafting Interpreters](https://craftinginterpreters.com/).
+The following grammar syntax is based on the grammar syntax used in [Crafting Interpreters](https://craftinginterpreters.com/representing-code.html).
 
 ```
 value     ->  object | array | literal
@@ -24,6 +24,16 @@ literal   ->  string | number | "true" | "false"| "null"
 ## Options
 
 The parser has some options for how it parses JSON.
+
+```rs
+pub struct Options {
+    pub allow_unquoted_identifier: bool,
+    pub allow_trailing_comma: bool,
+    pub allow_single_quotes: bool,
+    pub allow_comments: bool,
+    pub tab_width: usize,
+}
+```
 
 ### `allow_unquoted_identifier`
 
