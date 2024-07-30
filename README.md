@@ -114,7 +114,7 @@ fn main() -> Result<(), Error> {
 Add content to `test.json`.
 
 ```js
-/* Using Options::js() will make allow this to be parsed */
+/* Using Options::js() will allow this to be parsed normally */
 {
     hello: 'world',
     things: ['one', 'two', 'three'],
