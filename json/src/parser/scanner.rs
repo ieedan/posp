@@ -194,7 +194,8 @@ impl<'a> Scanner<'a> {
                     let start_line = self.line;
                     let start_column = self.column;
                     if is_digit(&c) || c == b'-' {
-                        while is_digit(&self.peek()) || self.peek() == b'-' {
+                        self.advance(1);
+                        while is_digit(&self.peek()) {
                             self.advance(1);
                         }
 

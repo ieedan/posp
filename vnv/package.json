@@ -1,0 +1,34 @@
+{
+	"name": "vnv",
+	"description": "",
+	"version": "1.0.0",
+	"author": "",
+	"main": "bin.mjs",
+	"bin": "./bin.mjs",
+	"type": "module",
+	"files": [
+		"bin.mjs",
+		"package.json",
+		"package-lock.json",
+		"README.md",
+		"templates",
+		"dist"
+	],
+	"scripts": {
+		"start": "unbuild && node bin.mjs",
+		"build": "unbuild",
+		"format": "npx prettier . --write"
+	},
+	"keywords": [],
+	"license": "ISC",
+	"dependencies": {
+		"fs-extra": "^11.2.0",
+		"template-factory": "^0.3.0"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^11.0.4",
+		"prettier": "^3.3.3",
+		"typescript": "^5.5.3",
+		"unbuild": "^2.0.0"
+	}
+}
