@@ -70,16 +70,17 @@ export const scanner = ({ tab_width }: Options) => {
 					case ']':
 						add_token(TokenType.LEFT_SQUARE_BRACKET);
 						break;
-					case '"':
+					// "'" ignores any interpolations inside
+					case "'":
 						let start_line = line;
 						let start_column = column;
 						advance();
 
-						while (peek() != '"' && !is_at_end()) {
+						while (peek() != "'" && !is_at_end()) {
 							advance();
 						}
 
-						if (peek() != '"' && is_at_end()) {
+						if (peek() != "'" && is_at_end()) {
 							error(`Unterminated string at ${start_line}:${start_column}.`);
 							break;
 						}
@@ -112,9 +113,10 @@ export const scanner = ({ tab_width }: Options) => {
 						advance();
 						break;
 					default:
-						if (is_alpha(char) || char == '_') {
-							const is_value = tokens[tokens.length - 1]?.type == TokenType.EQUAL;
+						// check last token here not the last character
+						const is_value = tokens[tokens.length - 1]?.type == TokenType.EQUAL;
 
+						if (is_alpha(char) || char == '_') { // identifiers only
 							advance();
 
 							while (is_alphanumeric(peek()) && !is_at_end()) {
@@ -123,24 +125,12 @@ export const scanner = ({ tab_width }: Options) => {
 
 							const lexeme = source.substring(start, current);
 
-							if (is_value) {
-								tokens.push({
-									column: column - lexeme.length,
-									line,
-									lexeme,
-									type: TokenType.STRING,
-									literal: lexeme,
-								});
-							} else {
-								tokens.push({
-									column: column - lexeme.length,
-									line,
-									lexeme,
-									type: TokenType.IDENTIFIER,
-								});
-							}
-
-							break;
+							tokens.push({
+								column: column - lexeme.length,
+								line,
+								lexeme,
+								type: TokenType.IDENTIFIER,
+							});
 						} else if (is_digit(char) || peek() == '-') {
 							advance();
 							while (is_digit(peek()) && !is_at_end()) {
@@ -177,11 +167,9 @@ export const scanner = ({ tab_width }: Options) => {
 								literal: number,
 								lexeme: literal,
 							});
-
-							break;
+						} else {
+							error(`Unexpected token ${char} at ${line}:${column}`);
 						}
-
-						error(`Unexpected token ${char} at ${line}:${column}`);
 
 						advance();
 						break;
