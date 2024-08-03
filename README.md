@@ -7,7 +7,7 @@ posp (Piece of \*\*\*\* parsers). These are parser implementations never meant t
 
 # json `./json`
 
-A customizable recursive descent parser for JSON. Based on the [ECMA JSON standard](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+A customizable recursive descent parser for JSON written in Rust. Based on the [ECMA JSON standard](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
 
 ## Grammar
 
@@ -126,3 +126,9 @@ Run to get the ast
 ```
 cargo run
 ```
+
+
+# env `./env`
+
+Customizable recursive decent parser for `.env` files written in TypeScript.
+
