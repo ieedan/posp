@@ -1,10 +1,18 @@
 {
-  "tasks": {
-    "dev": "deno run --watch main.ts"
-  },
-  "imports": {
-    "@std/assert": "jsr:@std/assert@1",
-    "chalk": "npm:chalk@^5.3.0",
-    "commander": "npm:commander@^12.1.0"
-  }
+	"name": "@ladder/parser",
+	"version": "0.1.0",
+	"tasks": {
+		"dev": "deno run --watch main.ts"
+	},
+	"exports": "./main.ts",
+	"imports": {
+		"@std/assert": "jsr:@std/assert@1",
+		"chalk": "npm:chalk@^5.3.0",
+		"commander": "npm:commander@^12.1.0"
+	},
+	"fmt": {
+		"useTabs": true,
+		"semiColons": true,
+		"indentWidth": 4
+	}
 }

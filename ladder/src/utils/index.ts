@@ -1,11 +1,11 @@
 const isNumber = (num: unknown): boolean => {
-  if (typeof num === "number") {
-    return num - num === 0;
-  }
-  if (typeof num === "string" && num.trim() !== "") {
-    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-  }
-  return false;
+	if (typeof num === "number") {
+		return num - num === 0;
+	}
+	if (typeof num === "string" && num.trim() !== "") {
+		return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+	}
+	return false;
 };
 
 const ALPHA_REGEX = /[a-z]/i;
@@ -20,19 +20,19 @@ const ALPHA_REGEX = /[a-z]/i;
  * @returns
  */
 const isAlpha = (str: string) => {
-  return ALPHA_REGEX.test(str);
+	return ALPHA_REGEX.test(str);
 };
 
 const TAG_BODY_REGEX = /[a-z_0-9.\[\]:]/i;
 
 const isValidForTagBody = (str: string) => {
-  return TAG_BODY_REGEX.test(str);
+	return TAG_BODY_REGEX.test(str);
 };
 
 const IDENTIFIER_BODY_REGEX = /[a-z_0-9.\[\]]/i;
 
 const isValidForIdentifierBody = (str: string) => {
-  return IDENTIFIER_BODY_REGEX.test(str);
+	return IDENTIFIER_BODY_REGEX.test(str);
 };
 
 export { isAlpha, isNumber, isValidForIdentifierBody, isValidForTagBody };
