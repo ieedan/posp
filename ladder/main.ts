@@ -5,7 +5,7 @@ if (import.meta.main) {
 	const scanner = s.new();
 
 	const code =
-		"[GSV(Module,WAGO,EntryStatus,stsComm[0]),DIV(stsComm[0],4095,stsCommResult[0]),EQU(stsCommResult[0],4)OTE(stsEnetOk.0)];   ";
+		"[MOV(\\Barcode.str_BuildCode,WeintekBuildCode[0]),MOV(\\Barcode.str_SerialNumber,WeintekSerialNumber[0])];   ";
 
 	const [tokens, errors] = scanner.scan(code);
 

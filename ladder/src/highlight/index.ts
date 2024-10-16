@@ -18,26 +18,17 @@ const terminal = (tokens: Token[]): string => {
 			case "tag":
 				result += color.blue(token.lexeme);
 				break;
-			case "[":
-				result += color.gray(token.lexeme);
-				break;
-			case "]":
-				result += color.gray(token.lexeme);
-				break;
 			case "(":
 				result += color.yellowBright(token.lexeme);
 				break;
 			case ")":
 				result += color.yellowBright(token.lexeme);
 				break;
-			case ";":
-				result += color.gray(token.lexeme);
-				break;
-			case ",":
-				result += color.gray(token.lexeme);
-				break;
 			case " ":
 				result += color.bgBlue(token.lexeme);
+				break;
+			default:
+				result += color.gray(token.lexeme);
 				break;
 		}
 	}

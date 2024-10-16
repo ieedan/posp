@@ -1,5 +1,5 @@
 import type { Token } from "./tokens.ts";
-import { isAlpha, isNumber, isValidForIdentifierBody, isValidForTagBody } from "../utils/index.ts";
+import { isAlpha, isNumber, isAlphaNumeric, isValidForTagBody } from "../utils/index.ts";
 
 type Error = {
 	error: string;
@@ -17,7 +17,6 @@ const newScanner = (): Scanner => {
 		let i = 0;
 		const tokens: Token[] = [];
 		let errors: Error[] | null = null;
-		let isParam = false;
 
 		const _error = (error: string, start: number) => {
 			const err = { error, startColumn: start, endColumn: i };
@@ -54,8 +53,16 @@ const newScanner = (): Scanner => {
 		const _peekNext = () => code[i + 1];
 
 		while (!_isAtEnd()) {
-			// console.log(`i: ${i} - ${_peek()}`, tokens, errors);
-			switch (code[i]) {
+			// only valid syntax for branches here
+			switch (_peek()) {
+				case " ":
+					tokens.push({
+						typ: " ",
+						column: i,
+						lexeme: " ",
+					});
+					_advance();
+					break;
 				case "[":
 					tokens.push({
 						typ: "[",
@@ -72,21 +79,11 @@ const newScanner = (): Scanner => {
 					});
 					_advance();
 					break;
-				case "(":
-					isParam = true;
+				case ",":
 					tokens.push({
-						typ: "(",
+						typ: ",",
 						column: i,
-						lexeme: "(",
-					});
-					_advance();
-					break;
-				case ")":
-					isParam = false;
-					tokens.push({
-						typ: ")",
-						column: i,
-						lexeme: ")",
+						lexeme: ",",
 					});
 					_advance();
 					break;
@@ -98,129 +95,367 @@ const newScanner = (): Scanner => {
 					});
 					_advance();
 					break;
-				case ",":
-					tokens.push({
-						typ: ",",
-						column: i,
-						lexeme: ",",
-					});
-					_advance();
-					break;
-				case " ":
-					tokens.push({
-						typ: " ",
-						column: i,
-						lexeme: " ",
-					});
-					_advance();
-					break;
 				default:
-					if (isParam) {
-						let start = i;
-
-						while (!_isAtEnd() && _peek() != ")") {
-							if (_peek() === ",") {
-								tokens.push({
-									typ: ",",
-									column: start,
-									lexeme: ",",
-								});
-
-								_advance();
-
-								start = i;
-
-								continue;
-							}
-
-							// first character
-							if (start == i) {
-								const first = _peek();
-								if (first === "'") {
-									_advance();
-
-									// parse expecting a string literal
-									const end = _consume("'");
-
-									if (end === undefined) {
-										_error("Unterminated string literal '''!", start);
-									} else {
-										const str = code.slice(start, end);
-
-										tokens.push({
-											typ: "string",
-											column: start,
-											lexeme: str,
-										});
-									}
-								} else if (isNumber(first) || first == "-") {
-									// parse expecting a number
-
-									_advance();
-
-									while (isNumber(_peek())) {
-										_advance();
-									}
-
-									if (_peek() == "." && isNumber(_peekNext())) {
-										_advance();
-
-										while (isNumber(_peek())) {
-											_advance();
-										}
-									}
-
-									const num = code.slice(start, i);
-
-									tokens.push({
-										typ: "number",
-										column: start,
-										lexeme: num,
-									});
-								} else if (isAlpha(first) || first == "_") {
-									_advance();
-
-									while (isValidForTagBody(_peek())) {
-										_advance();
-									}
-
-									const tag = code.slice(start, i);
-
-									tokens.push({
-										typ: "tag",
-										column: start,
-										lexeme: tag,
-									});
-								} else {
-									_error("Invalid first character for instruction parameter.", i);
-									_advance();
-								}
-
-								continue;
-							}
-
-							_error("Unexpected token", i);
-
-							_advance();
-						}
-					} else if (isAlpha(_peek())) {
-						const start = i;
-						_advance();
-
-						while (isValidForIdentifierBody(_peek())) {
+					if (isAlpha(_peek()) || _peek() == "_") {
+						const s = i;
+						while (isAlphaNumeric(_peek()) || _peek() == "_") {
 							_advance();
 						}
 
-						const instruction = code.slice(start, i);
+						const instruction = code.slice(s, i);
 
 						tokens.push({
 							typ: "instruction",
-							column: start,
+							column: s,
 							lexeme: instruction,
 						});
+
+						const end = _consume("(");
+
+						if (end == undefined) {
+							_error(`Unexpected token '${_peek()}'`, i);
+							_advance();
+							continue;
+						} else {
+							tokens.push({
+								typ: "(",
+								column: i - 1,
+								lexeme: "(",
+							});
+						}
+
+						// start parsing parameters
+
+						const start = i;
+
+						// when stack hits 0 we know we should be done with parameters
+						let parensStack: number = 1;
+
+						let done = false;
+
+						while (!_isAtEnd() && !done) {
+							switch (_peek()) {
+								case "(":
+									// add to stack
+									parensStack++;
+									tokens.push({
+										typ: "(",
+										column: i,
+										lexeme: "(",
+									});
+									_advance();
+									break;
+								case ")":
+									// pop prop stack
+									parensStack--;
+									tokens.push({
+										typ: ")",
+										column: i,
+										lexeme: ")",
+									});
+									_advance();
+
+									// if we reach 0 on the stack break out
+									if (parensStack == 0) {
+										done = true;
+										break;
+									}
+
+									break;
+								case "[":
+									tokens.push({
+										typ: "[",
+										column: i,
+										lexeme: "[",
+									});
+									_advance();
+									break;
+								case "]":
+									tokens.push({
+										typ: "]",
+										column: i,
+										lexeme: "]",
+									});
+									_advance();
+									break;
+								case ",":
+									tokens.push({
+										typ: ",",
+										column: i,
+										lexeme: ",",
+									});
+									_advance();
+									break;
+								case "^":
+									tokens.push({
+										typ: "^",
+										column: i,
+										lexeme: "^",
+									});
+									_advance();
+									break;
+								case "-":
+									tokens.push({
+										typ: "-",
+										column: i,
+										lexeme: "-",
+									});
+									_advance();
+									break;
+								case "+":
+									tokens.push({
+										typ: "+",
+										column: i,
+										lexeme: "+",
+									});
+									_advance();
+									break;
+								case "~":
+									tokens.push({
+										typ: "~",
+										column: i,
+										lexeme: "~",
+									});
+									_advance();
+									break;
+								case "*":
+									tokens.push({
+										typ: "*",
+										column: i,
+										lexeme: "*",
+									});
+									_advance();
+									break;
+								case "/":
+									tokens.push({
+										typ: "/",
+										column: i,
+										lexeme: "/",
+									});
+									_advance();
+									break;
+								case "%":
+									tokens.push({
+										typ: "%",
+										column: i,
+										lexeme: "%",
+									});
+									_advance();
+									break;
+								case "<":
+									switch (_peekNext()) {
+										case "<":
+											tokens.push({
+												typ: "<<",
+												column: i,
+												lexeme: "<<",
+											});
+											_advance();
+											break;
+										case "=":
+											tokens.push({
+												typ: "<=",
+												column: i,
+												lexeme: "<=",
+											});
+											_advance();
+											break;
+										default:
+											tokens.push({
+												typ: "<",
+												column: i,
+												lexeme: "<",
+											});
+											break;
+									}
+									_advance();
+									break;
+								case ">":
+									switch (_peekNext()) {
+										case ">":
+											tokens.push({
+												typ: ">>",
+												column: i,
+												lexeme: ">>",
+											});
+											_advance();
+											break;
+										case "=":
+											tokens.push({
+												typ: ">=",
+												column: i,
+												lexeme: ">=",
+											});
+											_advance();
+											break;
+										default:
+											tokens.push({
+												typ: ">",
+												column: i,
+												lexeme: ">",
+											});
+											break;
+									}
+									_advance();
+									break;
+								case "|": {
+									const s = i;
+									if (_peekNext() == "|") {
+										_advance();
+									}
+
+									const lex = code.slice(s, i+1);
+
+									tokens.push({
+										// @ts-ignore we know this is either | or ||
+										typ: lex,
+										column: s,
+										lexeme: lex,
+									});
+									_advance();
+									break;
+								}
+								case "&": {
+									const s = i;
+									if (_peekNext() == "&") {
+										_advance();
+									}
+
+									const lex = code.slice(s, i+1);
+
+									tokens.push({
+										// @ts-ignore we know this is either & or &&
+										typ: lex,
+										column: s,
+										lexeme: lex,
+									});
+									_advance();
+									break;
+								}
+								case "?": {
+									const s = i;
+									if (_peekNext() == "?") {
+										_advance();
+									}
+
+									const lex = code.slice(s, i+1);
+
+									tokens.push({
+										// @ts-ignore we know this is either ? or ??
+										typ: lex,
+										column: s,
+										lexeme: lex,
+									});
+									_advance();
+									break;
+								}
+								case "=": {
+									const s = i;
+									if (_peekNext() == "=") {
+										_advance();
+									}
+
+									const lex = code.slice(s, i+1);
+
+									tokens.push({
+										// @ts-ignore we know this is either = or ==
+										typ: lex,
+										column: s,
+										lexeme: lex,
+									});
+									_advance();
+									break;
+								}
+								case "!": {
+									const s = i;
+									if (_peekNext() == "=") {
+										_advance();
+									}
+
+									const lex = code.slice(s, i+1);
+
+									tokens.push({
+										// @ts-ignore we know this is either ! or !=
+										typ: lex,
+										column: s,
+										lexeme: lex,
+									});
+									_advance();
+									break;
+								}
+								case "'": {
+									const s = i;
+									_advance();
+
+									const end = _consume("'");
+
+									if (!end) {
+										_error("Unclosed string literal!", i);
+										break;
+									}
+
+									const str = code.slice(s, i);
+
+									tokens.push({
+										typ: "string",
+										column: s,
+										lexeme: str,
+									});
+									break;
+								}
+								default: {
+									if (isAlpha(_peek()) || _peek() == "_" || _peek() == "\\") {
+										const s = i;
+										_advance();
+
+										while (isValidForTagBody(_peek())) {
+											_advance();
+										}
+
+										const tag = code.slice(s, i);
+
+										tokens.push({
+											typ: "tag",
+											column: s,
+											lexeme: tag,
+										});
+									} else if (isNumber(_peek())) {
+										const s = i;
+										while (isNumber(_peek())) {
+											_advance();
+										}
+
+										if (_peek() == "." && isNumber(_peekNext())) {
+											_advance();
+
+											while (isNumber(_peek())) {
+												_advance();
+											}
+										}
+
+										const num = code.slice(s, i);
+
+										tokens.push({
+											typ: "number",
+											column: s,
+											lexeme: num,
+										});
+									} else {
+										_error(`Unexpected token '${_peek()}'!`, i);
+										_advance();
+									}
+									break;
+								}
+							}
+						}
+
+						if (!done) {
+							_error("Unfinished params", start);
+						}
 					} else {
-						_error("Unexpected token", i);
+						_error(`Unexpected token '${_peek()}'!`, i);
 						_advance();
+						continue;
 					}
 					break;
 			}
