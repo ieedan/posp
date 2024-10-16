@@ -1,4 +1,4 @@
-import type { Token } from "../tokens/index.ts";
+import type { Token } from "../scanner/tokens.ts";
 import color from "chalk";
 
 const terminal = (tokens: Token[]): string => {

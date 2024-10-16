@@ -5,7 +5,7 @@ if (import.meta.main) {
 	const scanner = s.new();
 
 	const code =
-		"EQU('twenty','four')EQU(MainSeq,0)[MOV(-10,MainSeq),OTL(GetCycleTime)];   ";
+		"[GSV(Module,WAGO,EntryStatus,stsComm[0]),DIV(stsComm[0],4095,stsCommResult[0]),EQU(stsCommResult[0],4)OTE(stsEnetOk.0)];   ";
 
 	const [tokens, errors] = scanner.scan(code);
 

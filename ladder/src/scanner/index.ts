@@ -1,10 +1,5 @@
-import type { Token } from "../tokens/index.ts";
-import {
-	isAlpha,
-	isNumber,
-	isValidForIdentifierBody,
-	isValidForTagBody,
-} from "../utils/index.ts";
+import type { Token } from "./tokens.ts";
+import { isAlpha, isNumber, isValidForIdentifierBody, isValidForTagBody } from "../utils/index.ts";
 
 type Error = {
 	error: string;
@@ -148,10 +143,7 @@ const newScanner = (): Scanner => {
 									const end = _consume("'");
 
 									if (end === undefined) {
-										_error(
-											"Unterminated string literal '''!",
-											start,
-										);
+										_error("Unterminated string literal '''!", start);
 									} else {
 										const str = code.slice(start, end);
 
@@ -170,10 +162,7 @@ const newScanner = (): Scanner => {
 										_advance();
 									}
 
-									if (
-										_peek() == "." &&
-										isNumber(_peekNext())
-									) {
+									if (_peek() == "." && isNumber(_peekNext())) {
 										_advance();
 
 										while (isNumber(_peek())) {
@@ -188,7 +177,7 @@ const newScanner = (): Scanner => {
 										column: start,
 										lexeme: num,
 									});
-								} else if (isAlpha(first)) {
+								} else if (isAlpha(first) || first == "_") {
 									_advance();
 
 									while (isValidForTagBody(_peek())) {
@@ -203,10 +192,7 @@ const newScanner = (): Scanner => {
 										lexeme: tag,
 									});
 								} else {
-									_error(
-										"Invalid first character for instruction parameter.",
-										i,
-									);
+									_error("Invalid first character for instruction parameter.", i);
 									_advance();
 								}
 
