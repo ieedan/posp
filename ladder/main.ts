@@ -4,8 +4,9 @@ import * as highlight from "./src/highlight/index.ts";
 if (import.meta.main) {
 	const scanner = s.new();
 
-	const code =
-		"[MOV(\\Barcode.str_BuildCode,WeintekBuildCode[0]),MOV(\\Barcode.str_SerialNumber,WeintekSerialNumber[0])];   ";
+	const fileText = await Deno.readTextFileSync("./test.txt");
+
+	const code = fileText;
 
 	const [tokens, errors] = scanner.scan(code);
 

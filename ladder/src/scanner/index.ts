@@ -1,4 +1,4 @@
-import type { Token } from "./tokens.ts";
+import { EXPRESSION_FUNCTIONS, type Token } from "./tokens.ts";
 import { isAlpha, isNumber, isAlphaNumeric, isValidForTagBody } from "../utils/index.ts";
 
 type Error = {
@@ -56,11 +56,7 @@ const newScanner = (): Scanner => {
 			// only valid syntax for branches here
 			switch (_peek()) {
 				case " ":
-					tokens.push({
-						typ: " ",
-						column: i,
-						lexeme: " ",
-					});
+					// strip whitespace
 					_advance();
 					break;
 				case "[":
@@ -178,19 +174,15 @@ const newScanner = (): Scanner => {
 									});
 									_advance();
 									break;
+								case " ":
+									// strip whitespace
+									_advance();
+									break;
 								case ",":
 									tokens.push({
 										typ: ",",
 										column: i,
 										lexeme: ",",
-									});
-									_advance();
-									break;
-								case "^":
-									tokens.push({
-										typ: "^",
-										column: i,
-										lexeme: "^",
 									});
 									_advance();
 									break;
@@ -210,22 +202,23 @@ const newScanner = (): Scanner => {
 									});
 									_advance();
 									break;
-								case "~":
+								case "*": {
+									const s = i;
+									if (_peekNext() == "*") {
+										_advance();
+									}
+
+									const lex = code.slice(s, i + 1);
+
 									tokens.push({
-										typ: "~",
-										column: i,
-										lexeme: "~",
+										// @ts-ignore we know this is either * or **
+										typ: lex,
+										column: s,
+										lexeme: lex,
 									});
 									_advance();
 									break;
-								case "*":
-									tokens.push({
-										typ: "*",
-										column: i,
-										lexeme: "*",
-									});
-									_advance();
-									break;
+								}
 								case "/":
 									tokens.push({
 										typ: "/",
@@ -234,21 +227,13 @@ const newScanner = (): Scanner => {
 									});
 									_advance();
 									break;
-								case "%":
-									tokens.push({
-										typ: "%",
-										column: i,
-										lexeme: "%",
-									});
-									_advance();
-									break;
 								case "<":
 									switch (_peekNext()) {
-										case "<":
+										case ">":
 											tokens.push({
-												typ: "<<",
+												typ: "<>",
 												column: i,
-												lexeme: "<<",
+												lexeme: "<>",
 											});
 											_advance();
 											break;
@@ -272,14 +257,6 @@ const newScanner = (): Scanner => {
 									break;
 								case ">":
 									switch (_peekNext()) {
-										case ">":
-											tokens.push({
-												typ: ">>",
-												column: i,
-												lexeme: ">>",
-											});
-											_advance();
-											break;
 										case "=":
 											tokens.push({
 												typ: ">=",
@@ -298,47 +275,13 @@ const newScanner = (): Scanner => {
 									}
 									_advance();
 									break;
-								case "|": {
-									const s = i;
-									if (_peekNext() == "|") {
-										_advance();
-									}
-
-									const lex = code.slice(s, i+1);
-
-									tokens.push({
-										// @ts-ignore we know this is either | or ||
-										typ: lex,
-										column: s,
-										lexeme: lex,
-									});
-									_advance();
-									break;
-								}
-								case "&": {
-									const s = i;
-									if (_peekNext() == "&") {
-										_advance();
-									}
-
-									const lex = code.slice(s, i+1);
-
-									tokens.push({
-										// @ts-ignore we know this is either & or &&
-										typ: lex,
-										column: s,
-										lexeme: lex,
-									});
-									_advance();
-									break;
-								}
 								case "?": {
 									const s = i;
 									if (_peekNext() == "?") {
 										_advance();
 									}
 
-									const lex = code.slice(s, i+1);
+									const lex = code.slice(s, i + 1);
 
 									tokens.push({
 										// @ts-ignore we know this is either ? or ??
@@ -350,35 +293,11 @@ const newScanner = (): Scanner => {
 									break;
 								}
 								case "=": {
-									const s = i;
-									if (_peekNext() == "=") {
-										_advance();
-									}
-
-									const lex = code.slice(s, i+1);
-
 									tokens.push({
 										// @ts-ignore we know this is either = or ==
-										typ: lex,
-										column: s,
-										lexeme: lex,
-									});
-									_advance();
-									break;
-								}
-								case "!": {
-									const s = i;
-									if (_peekNext() == "=") {
-										_advance();
-									}
-
-									const lex = code.slice(s, i+1);
-
-									tokens.push({
-										// @ts-ignore we know this is either ! or !=
-										typ: lex,
-										column: s,
-										lexeme: lex,
+										typ: "=",
+										column: i,
+										lexeme: "=",
 									});
 									_advance();
 									break;
@@ -404,6 +323,7 @@ const newScanner = (): Scanner => {
 									break;
 								}
 								default: {
+									// when referencing a program parameter tags are prefixed with '\'
 									if (isAlpha(_peek()) || _peek() == "_" || _peek() == "\\") {
 										const s = i;
 										_advance();
@@ -414,11 +334,21 @@ const newScanner = (): Scanner => {
 
 										const tag = code.slice(s, i);
 
-										tokens.push({
-											typ: "tag",
-											column: s,
-											lexeme: tag,
-										});
+										// @ts-ignore we must do this check
+										if (EXPRESSION_FUNCTIONS.includes(tag)) {
+											tokens.push({
+												// @ts-ignore it must be a keyword
+												typ: tag,
+												column: s,
+												lexeme: tag,
+											});
+										} else {
+											tokens.push({
+												typ: "tag",
+												column: s,
+												lexeme: tag,
+											});
+										}
 									} else if (isNumber(_peek())) {
 										const s = i;
 										while (isNumber(_peek())) {

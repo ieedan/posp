@@ -1,4 +1,4 @@
-import type { Token } from "../scanner/tokens.ts";
+import { EXPRESSION_FUNCTIONS, type Token } from "../scanner/tokens.ts";
 import color from "chalk";
 
 const terminal = (tokens: Token[]): string => {
@@ -24,11 +24,17 @@ const terminal = (tokens: Token[]): string => {
 			case ")":
 				result += color.yellowBright(token.lexeme);
 				break;
-			case " ":
-				result += color.bgBlue(token.lexeme);
+			case ";":
+				result += color.gray(token.lexeme) + '\n';
 				break;
 			default:
-				result += color.gray(token.lexeme);
+				// @ts-ignore we must do this check
+				if (EXPRESSION_FUNCTIONS.includes(token.typ)) {
+					result += color.blueBright(token.lexeme);
+				} else {
+					result += color.gray(token.lexeme);
+				}
+
 				break;
 		}
 	}
