@@ -1,6 +1,7 @@
 import * as s from "./src/scanner/index.ts";
 import * as p from "./src/parser/index.ts";
 import * as highlight from "./src/highlight/index.ts";
+import { toString } from "./src/utils/ast.ts";
 
 if (import.meta.main) {
 	const scanner = s.new();
@@ -24,7 +25,14 @@ if (import.meta.main) {
 
 	const rungs = parser.parse(tokens);
 
-	console.log("");
-	console.log(JSON.stringify(rungs, null, 2));
-	console.log("");
+	// console.log("");
+	// console.log(JSON.stringify(rungs, null, 2));
+	// console.log("");
+
+	const display = toString(rungs);
+
+	for (const rung of display) {
+		console.log(rung);
+		console.log("");
+	}
 }

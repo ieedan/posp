@@ -10,25 +10,14 @@ type Error = {
 	error: string;
 };
 
-const EMPTY_RUNG: Rung = { logic: { typ: "And", conditions: [] } } as const;
+const newEmptyRung = (): Rung => ({ logic: { typ: "And", conditions: [] } });
 
 const newParser = (): Parser => {
 	const parse = (tokens: Token[]) => {
 		const rungs: Rung[] = [];
-		let errors: Error[] | null = null;
 
 		let i = 0;
-		let currentRung: Rung = EMPTY_RUNG;
-
-		const _error = (error: string, start: number) => {
-			const err = { error, startColumn: start, endColumn: i };
-			if (errors === null) {
-				errors = [err];
-				return;
-			}
-
-			errors.push(err);
-		};
+		let currentRung: Rung = newEmptyRung();
 
 		/** Check if is at end */
 		const _isAtEnd = () => i >= tokens.length;
@@ -50,9 +39,6 @@ const newParser = (): Parser => {
 		};
 
 		const _peek = () => tokens[i];
-
-		/** See the next token */
-		const _peekNext = () => tokens[i + 1];
 
 		const _match = (...mat: Token["typ"][]): boolean => mat.includes(_peek().typ);
 
@@ -91,7 +77,6 @@ const newParser = (): Parser => {
 		};
 
 		const _and = (): Result<Branch, Error> => {
-			console.log(_peek())
 			const instructionRes = _instruction();
 
 			if (instructionRes.isErr()) {
@@ -100,7 +85,7 @@ const newParser = (): Parser => {
 
 			const branches: Branch[] = [instructionRes.unwrap()];
 
-			while (!_isAtEnd() && !_match(",", "]")) {
+			while (!_isAtEnd() && !_match(",", "]", ";")) {
 				const instructionRes = _or();
 
 				if (instructionRes.isErr()) {
@@ -196,7 +181,7 @@ const newParser = (): Parser => {
 		while (!_isAtEnd()) {
 			if (_peek().typ == ";") {
 				rungs.push(currentRung);
-				currentRung = EMPTY_RUNG;
+				currentRung = newEmptyRung();
 				_advance();
 				continue;
 			}
