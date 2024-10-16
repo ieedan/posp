@@ -1,4 +1,5 @@
 import * as s from "./src/scanner/index.ts";
+import * as p from "./src/parser/index.ts";
 import * as highlight from "./src/highlight/index.ts";
 
 if (import.meta.main) {
@@ -17,5 +18,13 @@ if (import.meta.main) {
 
 	console.log("");
 	console.log(highlight.terminal(tokens));
+	console.log("");
+
+	const parser = p.new();
+
+	const rungs = parser.parse(tokens);
+
+	console.log("");
+	console.log(JSON.stringify(rungs, null, 2));
 	console.log("");
 }

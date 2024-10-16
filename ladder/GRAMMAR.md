@@ -1,25 +1,11 @@
 # LGX 5000 Grammar
 
 ```
+XIC(stsSftyOk)[XIC(hmiAutoModePB),XIC(stsAutoMode)XIO(stsManualMode)]XIO(stsAlarm)[OTE(stsAutoMode),ONS(ONS_DINT.1)OTL(EZ_Light.Off)];   
+```
 
-rung         ->   branch* ";"
+```
 
-branch       ->   operator* | ( "[" operator | ( operator "," )* "]" )*
 
-operator     ->   instruction "(" expression | ( expression "," )* ")"
-
-expression   ->   equality
-
-equality     ->   comparison | ( ( "!=" | "==" ) comparison )*
-
-comparison   ->   term ( ( ">" | "<" | "<=" | ">=" ) term )*
-
-term         ->   factor ( ( "+" | "-" ) factor )*
-
-factor       ->   unary ( ( "*" | "/" ) unary )*
-
-unary        ->   ( "!" | "-" ) unary | primary
-
-primary      ->   NUMBER | STRING | "?" | "??" | "(" expression ")"
 
 ```
