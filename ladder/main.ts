@@ -29,9 +29,11 @@ if (import.meta.main) {
 	// console.log(JSON.stringify(rungs, null, 2));
 	// console.log("");
 
-	const analzyerErrors = logixAnalyzer.analyze(rungs);
+	const analyzerErrors = logixAnalyzer.analyze(rungs);
 
-	for (const error of analzyerErrors) {
-		console.log(logixAnalyzer.formatObservation(error));
+	if (analyzerErrors) {
+		for (const error of analyzerErrors) {
+			console.log(logixAnalyzer.formatObservation(error));
+		}
 	}
 }
