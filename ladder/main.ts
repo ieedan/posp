@@ -11,7 +11,7 @@ if (import.meta.main) {
 
 	const scanner = s.new();
 
-	const fileText = await Deno.readTextFileSync("./test.txt");
+	const fileText = Deno.readTextFileSync("./test.txt");
 
 	const code = fileText;
 
