@@ -9,18 +9,18 @@ export type StopWatch = {
 	elapsed: () => number;
 };
 
-/** Creates a new stopwatch instance 
- * 
- * @returns 
- * 
+/** Creates a new stopwatch instance
+ *
+ * @returns
+ *
  * # Usage
  * ```ts
  * const w = watch();
- * 
+ *
  * w.start();
- * 
+ *
  * await sleep(1000);
- * 
+ *
  * console.log(w.elapsed()); // 1000
  * ```
  */

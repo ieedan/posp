@@ -50,4 +50,10 @@ const isValidForIdentifierBody = (str: string) => {
 	return IDENTIFIER_BODY_REGEX.test(str);
 };
 
-export { isAlpha, isAlphaNumeric, isNumber, isValidForIdentifierBody, isValidForTagBody };
+export {
+	isAlpha,
+	isAlphaNumeric,
+	isNumber,
+	isValidForIdentifierBody,
+	isValidForTagBody,
+};

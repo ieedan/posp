@@ -1,7 +1,17 @@
 import type { Token } from "../scanner/tokens.ts";
 
 /** Expression types. You can determine which type by checking the `typ` prop on each expression. */
-export type Expression = Number | String | Undefined | Tag | Unary | Binary | Or | Xor | And | Func;
+export type Expression =
+	| Number
+	| String
+	| Undefined
+	| Tag
+	| Unary
+	| Binary
+	| Or
+	| Xor
+	| And
+	| Func;
 
 export type Number = {
 	typ: "Number";

@@ -1,5 +1,10 @@
-import { EXPRESSION_FUNCTIONS, type Token } from "./tokens.ts";
-import { isAlpha, isNumber, isAlphaNumeric, isValidForTagBody } from "../utils/index.ts";
+import { EXPRESSION_KEYWORDS, type Token } from "./tokens.ts";
+import {
+	isAlpha,
+	isAlphaNumeric,
+	isNumber,
+	isValidForTagBody,
+} from "../utils/index.ts";
 
 type Error = {
 	error: string;
@@ -324,7 +329,10 @@ const newScanner = (): Scanner => {
 								}
 								default: {
 									// when referencing a program parameter tags are prefixed with '\'
-									if (isAlpha(_peek()) || _peek() == "_" || _peek() == "\\") {
+									if (
+										isAlpha(_peek()) || _peek() == "_" ||
+										_peek() == "\\"
+									) {
 										const s = i;
 										_advance();
 
@@ -335,7 +343,7 @@ const newScanner = (): Scanner => {
 										const tag = code.slice(s, i);
 
 										// @ts-ignore we must do this check
-										if (EXPRESSION_FUNCTIONS.includes(tag)) {
+										if (EXPRESSION_KEYWORDS.includes(tag)) {
 											tokens.push({
 												// @ts-ignore it must be a keyword
 												typ: tag,
@@ -355,7 +363,10 @@ const newScanner = (): Scanner => {
 											_advance();
 										}
 
-										if (_peek() == "." && isNumber(_peekNext())) {
+										if (
+											_peek() == "." &&
+											isNumber(_peekNext())
+										) {
 											_advance();
 
 											while (isNumber(_peek())) {
@@ -371,7 +382,10 @@ const newScanner = (): Scanner => {
 											lexeme: num,
 										});
 									} else {
-										_error(`Unexpected token '${_peek()}'!`, i);
+										_error(
+											`Unexpected token '${_peek()}'!`,
+											i,
+										);
 										_advance();
 									}
 									break;

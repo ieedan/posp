@@ -1,61 +1,6 @@
-export type Token = {
-	typ:
-		| "instruction"
-		| "tag"
-
-		// literals
-		| "string"
-		| "number"
-
-		// symbols
-		| "["
-		| "]"
-		| "("
-		| ")"
-		| ";"
-		| ","
-		| "?"
-		| "??"
-
-		// expressions
-		| "="
-		| "<>"
-		| "<"
-		| "<="
-		| ">="
-		| ">"
-		| "*"
-		| "**"
-		| "/"
-		| "-"
-		| "+"
-		| "AND"
-		| "OR"
-		| "XOR"
-		| "ABS"
-		| "ACS"
-		| "ASN"
-		| "ATN"
-		| "COS"
-		| "DEG"
-		| "FRD"
-		| "LN"
-		| "LOG"
-		| "RAD"
-		| "SIN"
-		| "SQR"
-		| "TAN"
-		| "TON"
-		| "TRN"
-		| "MOD"
-		| "NOT"
-	lexeme: string;
-	column: number;
-};
-
 // See CMP instruction help for expression syntax
 
-export const EXPRESSION_FUNCTIONS = [
+export const EXPRESSION_KEYWORDS = [
 	"AND",
 	"OR",
 	"XOR",
@@ -77,6 +22,41 @@ export const EXPRESSION_FUNCTIONS = [
 	"MOD",
 	"NOT",
 ] as const;
+
+export type ExpressionKeyword = (typeof EXPRESSION_KEYWORDS)[number];
+
+export type Token = {
+	typ:
+		| "instruction"
+		| "tag"
+		// literals
+		| "string"
+		| "number"
+		// symbols
+		| "["
+		| "]"
+		| "("
+		| ")"
+		| ";"
+		| ","
+		| "?"
+		| "??"
+		// expressions
+		| "="
+		| "<>"
+		| "<"
+		| "<="
+		| ">="
+		| ">"
+		| "*"
+		| "**"
+		| "/"
+		| "-"
+		| "+"
+		| ExpressionKeyword;
+	lexeme: string;
+	column: number;
+};
 
 export type Instruction = {
 	typ: string;

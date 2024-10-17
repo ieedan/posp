@@ -11,7 +11,7 @@ const toString = (rungs: Rung[]): string[] => {
 	return rungDisplays;
 };
 
-const displayOr = (or: Or) => {
+const displayOr = (_or: Or) => {
 	return "--O--";
 };
 

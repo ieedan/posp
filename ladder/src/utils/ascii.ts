@@ -16,4 +16,4 @@ const NOP = "─NOP─";
 
 const RNG = "─────";
 
-export { XIC, XIO, OTE, OTL, OTU, ONS, RNG as RUNG, NOP };
+export { NOP, ONS, OTE, OTL, OTU, RNG as RUNG, XIC, XIO };

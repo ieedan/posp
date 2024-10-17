@@ -1,5 +1,5 @@
 import { Err, Ok, type Result } from "../blocks/result.ts";
-import { EXPRESSION_FUNCTIONS, type Token } from "../scanner/tokens.ts";
+import { EXPRESSION_KEYWORDS, type Token } from "../scanner/tokens.ts";
 import type { And, Branch, Rung } from "./tree.ts";
 import type { Expression } from "../expressions/index.ts";
 
@@ -32,7 +32,10 @@ const newParser = (): Parser => {
 			return prev;
 		};
 
-		const _consume = (match: Token["typ"], message: string): Result<Token, Error> => {
+		const _consume = (
+			match: Token["typ"],
+			message: string,
+		): Result<Token, Error> => {
 			if (_peek().typ === match) {
 				return Ok(_advance());
 			}
@@ -42,7 +45,8 @@ const newParser = (): Parser => {
 
 		const _peek = () => tokens[i];
 
-		const _match = (...mat: Token["typ"][]): boolean => mat.includes(_peek().typ);
+		const _match = (...mat: Token["typ"][]): boolean =>
+			mat.includes(_peek().typ);
 
 		const _and = (): Result<Branch, Error> => {
 			const instructionRes = _instruction();
@@ -78,7 +82,10 @@ const newParser = (): Parser => {
 
 				while (!_isAtEnd() && !_match("]")) {
 					if (branches.length > 0) {
-						const consumeRes = _consume(",", "Expected ',' before next condition.");
+						const consumeRes = _consume(
+							",",
+							"Expected ',' before next condition.",
+						);
 
 						if (consumeRes.isErr()) {
 							return Err(consumeRes.unwrapErr());
@@ -161,7 +168,10 @@ const newParser = (): Parser => {
 
 				const parameters: Expression[] = [];
 
-				const consumeRes = _consume("(", "Expected '(' before expression parameters.");
+				const consumeRes = _consume(
+					"(",
+					"Expected '(' before expression parameters.",
+				);
 
 				if (consumeRes.isErr()) {
 					return Err(consumeRes.unwrapErr());
@@ -169,7 +179,10 @@ const newParser = (): Parser => {
 
 				while (!_isAtEnd() && !_match(")")) {
 					if (parameters.length > 0) {
-						const consumeRes = _consume(",", "Expected ',' after parameter.");
+						const consumeRes = _consume(
+							",",
+							"Expected ',' after parameter.",
+						);
 
 						if (consumeRes.isErr()) {
 							return Err(consumeRes.unwrapErr());
@@ -189,7 +202,12 @@ const newParser = (): Parser => {
 					_advance();
 				}
 
-				return Ok({ typ: "Instruction", index: instructionIndex, name: instruction.lexeme, parameters });
+				return Ok({
+					typ: "Instruction",
+					index: instructionIndex,
+					name: instruction.lexeme,
+					parameters,
+				});
 			}
 
 			return Ok({ typ: "And", conditions: [] });
@@ -374,7 +392,11 @@ const newParser = (): Parser => {
 					return Err(unaryRes.unwrapErr());
 				}
 
-				const unary: Expression = { typ: "Unary", operator, right: unaryRes.unwrap() };
+				const unary: Expression = {
+					typ: "Unary",
+					operator,
+					right: unaryRes.unwrap(),
+				};
 
 				// attempt to simplify unary if into a number if possible
 				// gets rid of unnecessary expressions and errors where expressions are not expected
@@ -425,14 +447,17 @@ const newParser = (): Parser => {
 
 			let expr = factorResult.unwrap();
 
-			if (_match(...EXPRESSION_FUNCTIONS)) {
+			if (_match(...EXPRESSION_KEYWORDS)) {
 				const func = _advance();
 
 				const params: Expression[] = [];
 
 				while (!_isAtEnd() && !_match(")")) {
 					if (params.length > 0) {
-						const consumeRes = _consume(",", "Expected ',' after parameter.");
+						const consumeRes = _consume(
+							",",
+							"Expected ',' after parameter.",
+						);
 
 						if (consumeRes.isErr()) {
 							return Err(consumeRes.unwrapErr());
@@ -460,7 +485,10 @@ const newParser = (): Parser => {
 
 		const _primary = (): Result<Expression, Error> => {
 			if (_match("number")) {
-				return Ok({ typ: "Number", value: parseFloat(_advance().lexeme) });
+				return Ok({
+					typ: "Number",
+					value: parseFloat(_advance().lexeme),
+				});
 			}
 
 			if (_match("string")) {
@@ -527,7 +555,7 @@ const newParser = (): Parser => {
 				(branch) => {
 					currentRung.logic.conditions.push(branch);
 				},
-				() => {}
+				() => {},
 			);
 		}
 
