@@ -15,12 +15,14 @@ if (import.meta.main) {
 
 	const code = fileText;
 
-	const [tokens, errors] = scanner.scan(code);
+	const scanResult = scanner.scan(code);
 
-	if (errors != null) {
-		console.log(errors);
+	if (scanResult.isErr()) {
+		console.log(scanResult.unwrapErr());
 		Deno.exit(1);
 	}
+
+	const tokens = scanResult.unwrap();
 
 	const parser = p.new();
 
@@ -37,8 +39,12 @@ if (import.meta.main) {
 	console.log("");
 
 	// console.log("");
-	// console.log(JSON.stringify(rungs, null, 2));
+	// console.log(JSON.stringify(tokens, null, 2));
 	// console.log("");
+
+	console.log("");
+	console.log(JSON.stringify(rungs, null, 2));
+	console.log("");
 
 	if (analyzerErrors) {
 		for (const error of analyzerErrors) {

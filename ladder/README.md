@@ -11,4 +11,3 @@ A fully featured parser for Allen Bradley Studio 5000 ladder logic.
 
 - [ ] More robust parser
 - [ ] Show parser errors
-- [ ] Use Result for scanner api

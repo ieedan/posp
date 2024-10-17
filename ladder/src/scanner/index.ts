@@ -1,10 +1,6 @@
 import { EXPRESSION_KEYWORDS, type Token } from "./tokens.ts";
-import {
-	isAlpha,
-	isAlphaNumeric,
-	isNumber,
-	isValidForTagBody,
-} from "../utils/index.ts";
+import { isAlpha, isAlphaNumeric, isNumber, isValidForTagBody } from "../utils/index.ts";
+import { Err, Ok, type Result } from "../blocks/index.ts";
 
 type Error = {
 	error: string;
@@ -13,12 +9,12 @@ type Error = {
 };
 
 type Scanner = {
-	scan: (code: string) => [Token[], string[] | null];
+	scan: (code: string) => Result<Token[], string[] | null>;
 };
 
 /** Creates a new scanner instance  */
 const newScanner = (): Scanner => {
-	const scan = (code: string): [Token[], string[] | null] => {
+	const scan = (code: string): Result<Token[], string[] | null> => {
 		let i = 0;
 		const tokens: Token[] = [];
 		let errors: Error[] | null = null;
@@ -329,10 +325,7 @@ const newScanner = (): Scanner => {
 								}
 								default: {
 									// when referencing a program parameter tags are prefixed with '\'
-									if (
-										isAlpha(_peek()) || _peek() == "_" ||
-										_peek() == "\\"
-									) {
+									if (isAlpha(_peek()) || _peek() == "_" || _peek() == "\\") {
 										const s = i;
 										_advance();
 
@@ -363,10 +356,7 @@ const newScanner = (): Scanner => {
 											_advance();
 										}
 
-										if (
-											_peek() == "." &&
-											isNumber(_peekNext())
-										) {
+										if (_peek() == "." && isNumber(_peekNext())) {
 											_advance();
 
 											while (isNumber(_peek())) {
@@ -382,10 +372,7 @@ const newScanner = (): Scanner => {
 											lexeme: num,
 										});
 									} else {
-										_error(
-											`Unexpected token '${_peek()}'!`,
-											i,
-										);
+										_error(`Unexpected token '${_peek()}'!`, i);
 										_advance();
 									}
 									break;
@@ -405,7 +392,7 @@ const newScanner = (): Scanner => {
 			}
 		}
 
-		return [tokens, errors];
+		return errors === null ? Ok(tokens) : Err(errors);
 	};
 
 	return {
