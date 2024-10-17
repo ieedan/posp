@@ -44,42 +44,6 @@ const newParser = (): Parser => {
 
 		const _match = (...mat: Token["typ"][]): boolean => mat.includes(_peek().typ);
 
-		const _or = (): Result<Branch, Error> => {
-			if (_match("[")) {
-				_advance();
-
-				const branches: Branch[] = [];
-
-				while (!_isAtEnd() && !_match("]")) {
-					if (branches.length > 0) {
-						const consumeRes = _consume(",", "Expected ',' before next condition.");
-
-						if (consumeRes.isErr()) {
-							return Err(consumeRes.unwrapErr());
-						}
-					}
-
-					const branchRes = _or();
-
-					if (branchRes.isErr()) {
-						return branchRes;
-					}
-
-					branches.push(branchRes.unwrap());
-				}
-
-				if (_match("]")) {
-					_advance();
-				}
-
-				console.log(_peek());
-
-				return Ok({ typ: "Or", conditions: branches });
-			}
-
-			return _and();
-		};
-
 		const _and = (): Result<Branch, Error> => {
 			const instructionRes = _instruction();
 
@@ -104,6 +68,40 @@ const newParser = (): Parser => {
 			const simplified = _simplifyLogic(and);
 
 			return Ok(simplified);
+		};
+
+		const _or = (): Result<Branch, Error> => {
+			if (_match("[")) {
+				_advance();
+
+				const branches: Branch[] = [];
+
+				while (!_isAtEnd() && !_match("]")) {
+					if (branches.length > 0) {
+						const consumeRes = _consume(",", "Expected ',' before next condition.");
+
+						if (consumeRes.isErr()) {
+							return Err(consumeRes.unwrapErr());
+						}
+					}
+
+					const branchRes = _and();
+
+					if (branchRes.isErr()) {
+						return branchRes;
+					}
+
+					branches.push(branchRes.unwrap());
+				}
+
+				if (_match("]")) {
+					_advance();
+				}
+
+				return Ok({ typ: "Or", conditions: branches });
+			}
+
+			return _instruction();
 		};
 
 		/** Simplifies nested logic into it's simplest form */
@@ -517,7 +515,7 @@ const newParser = (): Parser => {
 				continue;
 			}
 
-			_or().match(
+			_and().match(
 				(branch) => {
 					currentRung.logic.conditions.push(branch);
 				},

@@ -25,9 +25,9 @@ if (import.meta.main) {
 
 	const rungs = parser.parse(tokens);
 
-	// console.log("");
-	// console.log(JSON.stringify(rungs, null, 2));
-	// console.log("");
+	console.log("");
+	console.log(JSON.stringify(rungs, null, 2));
+	console.log("");
 
 	const analzyerErrors = logixAnalyzer.analyze(rungs);
 
