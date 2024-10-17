@@ -1,1 +1,1 @@
-MOV('test', A);
+FSC(Control,?,?,A[B] * 12 = 14);

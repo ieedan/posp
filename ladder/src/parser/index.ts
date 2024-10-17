@@ -1,6 +1,7 @@
 import { Err, Ok, type Result } from "../blocks/result.ts";
-import type { Token } from "../scanner/tokens.ts";
-import type { And, Branch, Expression, Rung } from "./tree.ts";
+import { EXPRESSION_FUNCTIONS, type Token } from "../scanner/tokens.ts";
+import type { And, Branch, Rung } from "./tree.ts";
+import type { Expression } from "../expressions/index.ts";
 
 type Parser = {
 	parse: (tokens: Token[]) => Rung[];
@@ -137,6 +138,7 @@ const newParser = (): Parser => {
 					const newCondition = _simplifyLogic(condition);
 
 					if (newCondition.typ == "And") {
+						// moves conditions to top level
 						newConditions.push(...newCondition.conditions);
 					} else {
 						newConditions.push(newCondition);
@@ -191,7 +193,172 @@ const newParser = (): Parser => {
 		};
 
 		const _expression = (): Result<Expression, Error> => {
-			return _unary();
+			return _equality();
+		};
+
+		const _equality = (): Result<Expression, Error> => {
+			const orResult = _orExpression();
+
+			if (orResult.isErr()) {
+				return orResult;
+			}
+
+			let expr = orResult.unwrap();
+
+			if (_match("<", ">", "<=", ">=", "<>", "=")) {
+				const operator = _advance();
+				const rightRes = _orExpression();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "Binary",
+					left: expr,
+					operator,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
+		};
+
+		const _orExpression = (): Result<Expression, Error> => {
+			const xorResult = _xorExpression();
+
+			if (xorResult.isErr()) {
+				return xorResult;
+			}
+
+			let expr = xorResult.unwrap();
+
+			if (_match("OR")) {
+				_advance();
+				const rightRes = _orExpression();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "Or",
+					left: expr,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
+		};
+
+		const _xorExpression = (): Result<Expression, Error> => {
+			const andResult = _andExpression();
+
+			if (andResult.isErr()) {
+				return andResult;
+			}
+
+			let expr = andResult.unwrap();
+
+			if (_match("XOR")) {
+				_advance();
+				const rightRes = _andExpression();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "Xor",
+					left: expr,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
+		};
+
+		const _andExpression = (): Result<Expression, Error> => {
+			const binaryResult = _term();
+
+			if (binaryResult.isErr()) {
+				return binaryResult;
+			}
+
+			let expr = binaryResult.unwrap();
+
+			if (_match("AND")) {
+				_advance();
+				const rightRes = _term();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "And",
+					left: expr,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
+		};
+
+		const _term = (): Result<Expression, Error> => {
+			const factorResult = _factor();
+
+			if (factorResult.isErr()) {
+				return factorResult;
+			}
+
+			let expr = factorResult.unwrap();
+
+			if (_match("+", "-")) {
+				const operator = _advance();
+				const rightRes = _factor();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "Binary",
+					left: expr,
+					operator,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
+		};
+
+		const _factor = (): Result<Expression, Error> => {
+			const unaryResult = _unary();
+
+			if (unaryResult.isErr()) {
+				return unaryResult;
+			}
+
+			let expr = unaryResult.unwrap();
+
+			if (_match("*", "/")) {
+				const operator = _advance();
+				const rightRes = _unary();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "Binary",
+					left: expr,
+					operator,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
 		};
 
 		const _unary = (): Result<Expression, Error> => {
@@ -207,7 +374,77 @@ const newParser = (): Parser => {
 				return Ok({ typ: "Unary", operator, right: unaryRes.unwrap() });
 			}
 
-			return _primary();
+			return _pow();
+		};
+
+		const _pow = (): Result<Expression, Error> => {
+			const funcResult = _func();
+
+			if (funcResult.isErr()) {
+				return funcResult;
+			}
+
+			let expr = funcResult.unwrap();
+
+			if (_match("**")) {
+				const operator = _advance();
+				const rightRes = _func();
+
+				if (rightRes.isErr()) {
+					return rightRes;
+				}
+
+				expr = {
+					typ: "Binary",
+					left: expr,
+					operator,
+					right: rightRes.unwrap(),
+				};
+			}
+
+			return Ok(expr);
+		};
+
+		const _func = (): Result<Expression, Error> => {
+			const factorResult = _primary();
+
+			if (factorResult.isErr()) {
+				return factorResult;
+			}
+
+			let expr = factorResult.unwrap();
+
+			if (_match(...EXPRESSION_FUNCTIONS)) {
+				const func = _advance();
+
+				const params: Expression[] = [];
+
+				while (!_isAtEnd() && !_match(")")) {
+					if (params.length > 0) {
+						const consumeRes = _consume(",", "Expected ',' after parameter.");
+
+						if (consumeRes.isErr()) {
+							return Err(consumeRes.unwrapErr());
+						}
+					}
+
+					const paramRes = _term();
+
+					if (paramRes.isErr()) {
+						return paramRes;
+					}
+
+					params.push(paramRes.unwrap());
+				}
+
+				expr = {
+					typ: "Func",
+					name: func,
+					params,
+				};
+			}
+
+			return Ok(expr);
 		};
 
 		const _primary = (): Result<Expression, Error> => {
@@ -266,6 +503,7 @@ const newParser = (): Parser => {
 
 		while (!_isAtEnd()) {
 			if (_peek().typ == ";") {
+				// this should really only go one level as the rest should already be simplified
 				currentRung.logic = _simplifyAnd(currentRung.logic);
 				rungs.push(currentRung);
 				currentRung = newEmptyRung();
