@@ -1,7 +1,7 @@
 import * as s from "./src/scanner/index.ts";
 import * as p from "./src/parser/index.ts";
+import * as logixAnalyzer from "./src/analyzers/instruction-analyzer.ts";
 import * as highlight from "./src/highlight/index.ts";
-import { toString } from "./src/utils/ast.ts";
 
 if (import.meta.main) {
 	const scanner = s.new();
@@ -25,14 +25,11 @@ if (import.meta.main) {
 
 	const rungs = parser.parse(tokens);
 
-	console.log("");
-	console.log(JSON.stringify(rungs, null, 2));
-	console.log("");
+	// console.log("");
+	// console.log(JSON.stringify(rungs, null, 2));
+	// console.log("");
 
-	const display = toString(rungs);
+	const analzyerErrors = logixAnalyzer.analyze(rungs);
 
-	for (const rung of display) {
-		console.log(rung);
-		console.log("");
-	}
+	console.log(JSON.stringify(analzyerErrors, null, 2));
 }

@@ -18,6 +18,8 @@ export type Or = {
 
 export type Instruction = {
 	typ: "Instruction";
+	/** Point on the AST the instruction was added. Used for tracing errors during analysis stage. */
+	index: number;
 	name: string;
 	parameters: Expression[];
 };

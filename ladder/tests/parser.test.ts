@@ -23,6 +23,7 @@ Deno.test("Expect correct ast And", () => {
 				conditions: [
 					{
 						typ: "Instruction",
+						index: 0,
 						name: "XIC",
 						parameters: [
 							{
@@ -37,6 +38,7 @@ Deno.test("Expect correct ast And", () => {
 					},
 					{
 						typ: "Instruction",
+						index: 1,
 						name: "XIO",
 						parameters: [
 							{
@@ -51,6 +53,7 @@ Deno.test("Expect correct ast And", () => {
 					},
 					{
 						typ: "Instruction",
+						index: 2,
 						name: "OTE",
 						parameters: [
 							{
@@ -90,6 +93,7 @@ Deno.test("Expect correct ast Or", () => {
 						conditions: [
 							{
 								typ: "Instruction",
+								index: 0,
 								name: "XIC",
 								parameters: [
 									{
@@ -104,6 +108,7 @@ Deno.test("Expect correct ast Or", () => {
 							},
 							{
 								typ: "Instruction",
+								index: 1,
 								name: "XIO",
 								parameters: [
 									{
@@ -120,6 +125,7 @@ Deno.test("Expect correct ast Or", () => {
 					},
 					{
 						typ: "Instruction",
+						index: 2,
 						name: "OTE",
 						parameters: [
 							{

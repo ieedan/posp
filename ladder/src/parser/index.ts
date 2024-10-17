@@ -18,6 +18,7 @@ const newParser = (): Parser => {
 		const rungs: Rung[] = [];
 
 		let i = 0;
+		let currentRungInstruction = 0;
 		let currentRung: Rung = newEmptyRung();
 
 		/** Check if is at end */
@@ -70,6 +71,8 @@ const newParser = (): Parser => {
 				if (_match("]")) {
 					_advance();
 				}
+
+				console.log(_peek());
 
 				return Ok({ typ: "Or", conditions: branches });
 			}
@@ -154,6 +157,8 @@ const newParser = (): Parser => {
 
 		const _instruction = (): Result<Branch, Error> => {
 			if (_match("instruction")) {
+				const instructionIndex = currentRungInstruction;
+				currentRungInstruction++;
 				const instruction = _advance();
 
 				const parameters: Expression[] = [];
@@ -186,7 +191,7 @@ const newParser = (): Parser => {
 					_advance();
 				}
 
-				return Ok({ typ: "Instruction", name: instruction.lexeme, parameters });
+				return Ok({ typ: "Instruction", index: instructionIndex, name: instruction.lexeme, parameters });
 			}
 
 			return Ok({ typ: "And", conditions: [] });
@@ -505,6 +510,7 @@ const newParser = (): Parser => {
 			if (_peek().typ == ";") {
 				// this should really only go one level as the rest should already be simplified
 				currentRung.logic = _simplifyAnd(currentRung.logic);
+				currentRungInstruction = 0;
 				rungs.push(currentRung);
 				currentRung = newEmptyRung();
 				_advance();

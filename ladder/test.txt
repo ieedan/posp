@@ -1,1 +1,1 @@
-FSC(Control,?,?,A[B] * 12 = 14);
+NOP()[[NOP(),NOP()][NOP(),NOP()]];
