@@ -1,6 +1,6 @@
 import { Err, Ok, type Result } from "../blocks/result.ts";
 import type { Token } from "../scanner/tokens.ts";
-import type { Branch, Expression, Rung } from "./tree.ts";
+import type { And, Branch, Expression, Rung } from "./tree.ts";
 
 type Parser = {
 	parse: (tokens: Token[]) => Rung[];
@@ -95,11 +95,59 @@ const newParser = (): Parser => {
 				branches.push(instructionRes.unwrap());
 			}
 
-			if (branches.length == 1) {
-				return Ok(branches[0]);
+			const and: Branch = { typ: "And", conditions: branches };
+
+			const simplified = _simplifyLogic(and);
+
+			return Ok(simplified);
+		};
+
+		/** Simplifies nested logic into it's simplest form */
+		const _simplifyLogic = (logic: Branch): Branch => {
+			// cannot be simplified because it is an Instruction or an Or
+			if (logic.typ !== "And") return logic;
+
+			// already in it's simplest form
+			if (logic.conditions.length == 0) return logic;
+
+			if (logic.conditions.length == 1) {
+				const condition = logic.conditions[0];
+
+				// if there is only one instruction as the condition we just return the instruction
+				if (condition.typ == "Instruction") {
+					return condition;
+				} else if (condition.typ == "And") {
+					// continue simplification
+					return _simplifyLogic(condition);
+				} else {
+					return condition;
+				}
 			}
 
-			return Ok({ typ: "And", conditions: branches });
+			// for > 1 condition
+
+			const newConditions: Branch[] = [];
+
+			for (const condition of logic.conditions) {
+				if (condition.typ == "Instruction") {
+					// already simplified
+					newConditions.push(condition);
+				} else if (condition.typ == "And") {
+					// continue simplification
+					const newCondition = _simplifyLogic(condition);
+
+					if (newCondition.typ == "And") {
+						newConditions.push(...newCondition.conditions);
+					} else {
+						newConditions.push(newCondition);
+					}
+				} else if (condition.typ == "Or") {
+					// we don't know how to simplify ors
+					newConditions.push(condition);
+				}
+			}
+
+			return { typ: "And", conditions: newConditions };
 		};
 
 		const _instruction = (): Result<Branch, Error> => {
@@ -178,8 +226,37 @@ const newParser = (): Parser => {
 			return Err({ error: "Expected expression!" });
 		};
 
+		/** Simplifies 'And' expression back into another 'And' but gets rid of any unnecessary nesting */
+		const _simplifyAnd = (and: And): And => {
+			// already in simplest form
+			if (and.conditions.length == 0) return and;
+
+			if (and.conditions.length == 1) {
+				const condition = and.conditions[0];
+
+				if (condition.typ == "And") {
+					return { typ: "And", conditions: condition.conditions };
+				} else {
+					return and;
+				}
+			}
+
+			const newConditions: Branch[] = [];
+
+			for (const condition of and.conditions) {
+				if (condition.typ == "And") {
+					newConditions.push(..._simplifyAnd(condition).conditions);
+				} else {
+					newConditions.push(condition);
+				}
+			}
+
+			return { typ: "And", conditions: newConditions };
+		};
+
 		while (!_isAtEnd()) {
 			if (_peek().typ == ";") {
+				currentRung.logic = _simplifyAnd(currentRung.logic);
 				rungs.push(currentRung);
 				currentRung = newEmptyRung();
 				_advance();
