@@ -1,3 +1,8 @@
+/*
+   This is just an example for now and not mean to be a fully featured analyzer
+   currently it just implements a few basic features to test the usefulness of the produced AST
+*/
+
 import { arrayToMap } from "../blocks/index.ts";
 import type { Expression } from "../expressions/index.ts";
 import type { Branch, Instruction, Rung } from "../parser/tree.ts";
