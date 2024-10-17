@@ -22,54 +22,44 @@ Deno.test("Expect correct ast And", () => {
 				typ: "And",
 				conditions: [
 					{
-						typ: "And",
-						conditions: [
+						typ: "Instruction",
+						name: "XIC",
+						parameters: [
 							{
-								typ: "Instruction",
-								name: "XIC",
-								parameters: [
-									{
-										typ: "Tag",
-										token: {
-											typ: "tag",
-											column: 4,
-											lexeme: "Tag",
-										},
-									},
-								],
+								typ: "Tag",
+								token: {
+									typ: "tag",
+									column: 4,
+									lexeme: "Tag",
+								},
 							},
+						],
+					},
+					{
+						typ: "Instruction",
+						name: "XIO",
+						parameters: [
 							{
-								typ: "And",
-								conditions: [
-									{
-										typ: "Instruction",
-										name: "XIO",
-										parameters: [
-											{
-												typ: "Tag",
-												token: {
-													typ: "tag",
-													column: 12,
-													lexeme: "Tag2",
-												},
-											},
-										],
-									},
-									{
-										typ: "Instruction",
-										name: "OTE",
-										parameters: [
-											{
-												typ: "Tag",
-												token: {
-													typ: "tag",
-													column: 21,
-													lexeme: "Tag3",
-												},
-											},
-										],
-									},
-								],
+								typ: "Tag",
+								token: {
+									typ: "tag",
+									column: 12,
+									lexeme: "Tag2",
+								},
+							},
+						],
+					},
+					{
+						typ: "Instruction",
+						name: "OTE",
+						parameters: [
+							{
+								typ: "Tag",
+								token: {
+									typ: "tag",
+									column: 21,
+									lexeme: "Tag3",
+								},
 							},
 						],
 					},
@@ -89,8 +79,6 @@ Deno.test("Expect correct ast Or", () => {
 	}
 
 	const ast = parser.parse(tokens);
-
-	console.log(JSON.stringify(ast, null, 2));
 
 	assertEquals(ast, [
 		{

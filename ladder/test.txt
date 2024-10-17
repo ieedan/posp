@@ -1,1 +1,1 @@
-XIC(AlwOff)XIC(AlwOn)OTE(WAGO:O1.Data[51].5);
+[XIC(AlwOff),XIC(Bypass)]XIC(AlwOn)OTE(WAGO:O1.Data[51].5);
