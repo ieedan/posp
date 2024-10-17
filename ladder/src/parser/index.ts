@@ -374,7 +374,15 @@ const newParser = (): Parser => {
 					return Err(unaryRes.unwrapErr());
 				}
 
-				return Ok({ typ: "Unary", operator, right: unaryRes.unwrap() });
+				const unary: Expression = { typ: "Unary", operator, right: unaryRes.unwrap() };
+
+				// attempt to simplify unary if into a number if possible
+				// gets rid of unnecessary expressions and errors where expressions are not expected
+				if (unary.operator.typ == "-" && unary.right.typ == "Number") {
+					return Ok({ typ: "Number", value: -unary.right.value });
+				}
+
+				return Ok(unary);
 			}
 
 			return _pow();

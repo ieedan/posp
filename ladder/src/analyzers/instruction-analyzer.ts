@@ -27,10 +27,10 @@ export const formatObservation = (observation: Observation): string => {
 			fmt = `${color.bgRed(" ERROR ")} ${fmt}`;
 			break;
 		case "warn":
-			fmt = `${color.bgHex("#FFA500").white(" WARN ")} ${fmt}`;
+			fmt = `${color.bgHex("#FFA500").white(" WARN  ")} ${fmt}`;
 			break;
 		case "info":
-			fmt = `${color.gray(" INFO ")} ${fmt}`;
+			fmt = `${color.gray(" INFO  ")} ${fmt}`;
 			break;
 	}
 
@@ -66,6 +66,16 @@ export const acceptExpression: Parameter["accept"] = (expr, index, name = undefi
 export const acceptNumber: Parameter["accept"] = (expr, index, name = undefined) =>
 	expr.typ === "Number" ? undefined : `${name ?? `Operand ${index}`} only accepts Numbers`;
 
+export const acceptNumberOrTag: Parameter["accept"] = (expr, index, name = undefined) =>
+	expr.typ === "Number" || expr.typ === "Tag"
+		? undefined
+		: `${name ?? `Operand ${index}`} only accepts Numbers and Tags`;
+
+export const acceptStringOrTag: Parameter["accept"] = (expr, index, name = undefined) =>
+	expr.typ === "String" || expr.typ === "Tag"
+		? undefined
+		: `${name ?? `Operand ${index}`} only accepts Strings and Tags`;
+
 export const acceptComparable: Parameter["accept"] = (expr, index, name = undefined) => {
 	const ok = ["Number", "String", "Tag"].includes(expr.typ);
 
@@ -76,6 +86,14 @@ export const DEFAULT_INSTRUCTIONS: Map<string, LogixInstruction> = arrayToMap(
 	[
 		{
 			name: "XIC",
+			parameters: [
+				{
+					accept: acceptTag,
+				},
+			],
+		},
+		{
+			name: "RES",
 			parameters: [
 				{
 					accept: acceptTag,
@@ -145,6 +163,142 @@ export const DEFAULT_INSTRUCTIONS: Map<string, LogixInstruction> = arrayToMap(
 				{
 					name: "Accum",
 					accept: acceptNumber,
+				},
+			],
+		},
+		{
+			name: "CTU",
+			parameters: [
+				{
+					name: "Counter",
+					accept: acceptTag,
+				},
+				{
+					name: "Preset",
+					accept: acceptNumber,
+				},
+				{
+					name: "Accum",
+					accept: acceptNumber,
+				},
+			],
+		},
+		{
+			name: "CTD",
+			parameters: [
+				{
+					name: "Counter",
+					accept: acceptTag,
+				},
+				{
+					name: "Preset",
+					accept: acceptNumber,
+				},
+				{
+					name: "Accum",
+					accept: acceptNumber,
+				},
+			],
+		},
+		{
+			name: "ADD",
+			parameters: [
+				{
+					name: "Source A",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Source B",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Dest",
+					accept: acceptTag,
+				},
+			],
+		},
+		{
+			name: "DIV",
+			parameters: [
+				{
+					name: "Source A",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Source B",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Dest",
+					accept: acceptTag,
+				},
+			],
+		},
+		{
+			name: "MUL",
+			parameters: [
+				{
+					name: "Source A",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Source B",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Dest",
+					accept: acceptTag,
+				},
+			],
+		},
+		{
+			name: "MID",
+			parameters: [
+				{
+					name: "Source",
+					accept: acceptStringOrTag,
+				},
+				{
+					name: "Qty",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Start",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Dest",
+					accept: acceptTag,
+				},
+			],
+		},
+		{
+			name: "DTOS",
+			parameters: [
+				{
+					name: "Source",
+					accept: acceptNumberOrTag,
+				},
+				{
+					name: "Dest",
+					accept: acceptTag,
+				},
+			],
+		},
+		{
+			name: "CONCAT",
+			parameters: [
+				{
+					name: "Source A",
+					accept: acceptStringOrTag,
+				},
+				{
+					name: "Source B",
+					accept: acceptStringOrTag,
+				},
+				{
+					name: "Dest",
+					accept: acceptTag,
 				},
 			],
 		},

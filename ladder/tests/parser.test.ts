@@ -143,3 +143,69 @@ Deno.test("Expect correct ast Or", () => {
 		},
 	]);
 });
+
+Deno.test("Expect correct ast Nested Or", () => {
+	const input = "NOP()[[NOP(),NOP()][NOP,NOP()]];";
+
+	const [tokens, errors] = scanner.scan(input);
+
+	if (errors != null) {
+		throw new Error(JSON.stringify(errors, null, 2));
+	}
+
+	const ast = parser.parse(tokens);
+
+	assertEquals(ast, [
+		{
+			logic: {
+				typ: "And",
+				conditions: [
+					{
+						typ: "Instruction",
+						index: 0,
+						name: "NOP",
+						parameters: [],
+					},
+					{
+						typ: "Or",
+						conditions: [
+							{
+								typ: "And",
+								conditions: [
+									{
+										typ: "Or",
+										conditions: [
+											{
+												typ: "Instruction",
+												index: 1,
+												name: "NOP",
+												parameters: [],
+											},
+											{
+												typ: "Instruction",
+												index: 2,
+												name: "NOP",
+												parameters: [],
+											},
+										],
+									},
+									{
+										typ: "Or",
+										conditions: [
+											{
+												typ: "Instruction",
+												index: 3,
+												name: "NOP",
+												parameters: [],
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		},
+	]);
+});
