@@ -1,16 +1,43 @@
 import { arrayToMap } from "../blocks/index.ts";
 import type { Expression } from "../expressions/index.ts";
-import type { Branch, Rung } from "../parser/tree.ts";
+import type { Branch, Instruction, Rung } from "../parser/tree.ts";
+import color from "chalk";
 
-type Observation = {
+export type Observation = {
 	level: "error" | "warn" | "info";
 	message: string;
 	rung: number;
-	instruction?: number;
+	instruction?: Instruction;
 	parameter?: number;
 };
 
-type Parameter = {
+export const formatObservation = (observation: Observation): string => {
+	let fmt = `Rung ${observation.rung}`;
+
+	if (observation.instruction) {
+		fmt += `, ${observation.instruction.name}: `;
+	} else {
+		fmt += `: `;
+	}
+
+	fmt += observation.message;
+
+	switch (observation.level) {
+		case "error":
+			fmt = `${color.bgRed(" ERROR ")} ${fmt}`;
+			break;
+		case "warn":
+			fmt = `${color.bgHex("#FFA500").white(" WARN ")} ${fmt}`;
+			break;
+		case "info":
+			fmt = `${color.gray(" INFO ")} ${fmt}`;
+			break;
+	}
+
+	return fmt;
+};
+
+export type Parameter = {
 	/** Name of the parameter to appear in error messages. Defaults to `"Operand [index]"` */
 	name?: string;
 	/** If parameter is valid return undefined else return an error string.
@@ -23,29 +50,29 @@ type Parameter = {
 	accept: (expr: Expression, index: number, name: string | undefined) => string | undefined;
 };
 
-type LogixInstruction = {
+export type LogixInstruction = {
 	name: string;
 	warnMessage?: string;
 	banMessage?: string;
 	parameters: Parameter[];
 };
 
-const acceptTag: Parameter["accept"] = (expr, index, name = undefined) =>
+export const acceptTag: Parameter["accept"] = (expr, index, name = undefined) =>
 	expr.typ === "Tag" ? undefined : `${name ?? `Operand ${index}`} only accepts Tags`;
 
-const acceptExpression: Parameter["accept"] = (expr, index, name = undefined) =>
+export const acceptExpression: Parameter["accept"] = (expr, index, name = undefined) =>
 	expr.typ !== "String" ? undefined : `${name ?? `Operand ${index}`} only accepts Expressions`;
 
-const acceptNumber: Parameter["accept"] = (expr, index, name = undefined) =>
+export const acceptNumber: Parameter["accept"] = (expr, index, name = undefined) =>
 	expr.typ === "Number" ? undefined : `${name ?? `Operand ${index}`} only accepts Numbers`;
 
-const acceptComparable: Parameter["accept"] = (expr, index, name = undefined) => {
+export const acceptComparable: Parameter["accept"] = (expr, index, name = undefined) => {
 	const ok = ["Number", "String", "Tag"].includes(expr.typ);
 
 	return ok ? undefined : `${name ?? `Operand ${index}`} accepts Numbers, Strings, Tags`;
 };
 
-const DEFAULT_INSTRUCTIONS: Map<string, LogixInstruction> = arrayToMap(
+export const DEFAULT_INSTRUCTIONS: Map<string, LogixInstruction> = arrayToMap(
 	[
 		{
 			name: "XIC",
@@ -253,6 +280,9 @@ const DEFAULT_INSTRUCTIONS: Map<string, LogixInstruction> = arrayToMap(
 					name: "Routine Name",
 					accept: acceptTag,
 				},
+				{
+					accept: acceptNumber,
+				},
 			],
 		},
 		{
@@ -294,7 +324,7 @@ const analyze = (rungs: Rung[]): Observation[] | null => {
 
 	const _error = (
 		message: string,
-		instruction: number | undefined = undefined,
+		instruction: Instruction | undefined = undefined,
 		parameter: number | undefined = undefined
 	) => {
 		if (observations == null) {
@@ -306,7 +336,7 @@ const analyze = (rungs: Rung[]): Observation[] | null => {
 
 	const _warn = (
 		message: string,
-		instruction: number | undefined = undefined,
+		instruction: Instruction | undefined = undefined,
 		parameter: number | undefined = undefined
 	) => {
 		if (observations == null) {
@@ -318,7 +348,7 @@ const analyze = (rungs: Rung[]): Observation[] | null => {
 
 	const _info = (
 		message: string,
-		instruction: number | undefined = undefined,
+		instruction: Instruction | undefined = undefined,
 		parameter: number | undefined = undefined
 	) => {
 		if (observations == null) {
@@ -336,24 +366,24 @@ const analyze = (rungs: Rung[]): Observation[] | null => {
 				const instruction = DEFAULT_INSTRUCTIONS.get(branch.name);
 
 				if (!instruction) {
-					_error(`Unknown instruction '${branch.name}'!`, branch.index);
+					_error(`Unknown instruction '${branch.name}'!`, branch);
 					return;
 				}
 
 				if (instruction.parameters.length != branch.parameters.length) {
 					_error(
 						`Parameter length mismatch. Expected ${instruction.parameters.length} parameters got ${branch.parameters.length}.`,
-						branch.index
+						branch
 					);
 					return;
 				}
 
 				if (instruction.warnMessage) {
-					_warn(instruction.warnMessage, branch.index);
+					_warn(instruction.warnMessage, branch);
 				}
 
 				if (instruction.banMessage) {
-					_warn(instruction.banMessage, branch.index);
+					_warn(instruction.banMessage, branch);
 				}
 
 				for (let i = 0; i < instruction.parameters.length; i++) {
@@ -364,7 +394,7 @@ const analyze = (rungs: Rung[]): Observation[] | null => {
 					);
 
 					if (result !== undefined) {
-						_error(result, branch.index, i);
+						_error(result, branch, i);
 					}
 				}
 

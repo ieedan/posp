@@ -25,11 +25,13 @@ if (import.meta.main) {
 
 	const rungs = parser.parse(tokens);
 
-	console.log("");
-	console.log(JSON.stringify(rungs, null, 2));
-	console.log("");
+	// console.log("");
+	// console.log(JSON.stringify(rungs, null, 2));
+	// console.log("");
 
 	const analzyerErrors = logixAnalyzer.analyze(rungs);
 
-	console.log(JSON.stringify(analzyerErrors, null, 2));
+	for (const error of analzyerErrors) {
+		console.log(logixAnalyzer.formatObservation(error));
+	}
 }
