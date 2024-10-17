@@ -211,8 +211,18 @@ const newParser = (): Parser => {
 		};
 
 		const _primary = (): Result<Expression, Error> => {
-			if (_match("number", "string")) {
-				return Ok({ typ: "Literal", value: _advance().lexeme });
+			if (_match("number")) {
+				return Ok({ typ: "Number", value: parseFloat(_advance().lexeme) });
+			}
+
+			if (_match("string")) {
+				let trimmed = _advance().lexeme;
+
+				if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+					trimmed = trimmed.slice(1, trimmed.length - 1);
+				}
+
+				return Ok({ typ: "String", value: trimmed });
 			}
 
 			if (_match("tag")) {

@@ -23,10 +23,15 @@ export type Instruction = {
 };
 
 // this is later
-export type Expression = Literal | Undefined | Tag | Unary;
+export type Expression = Number | String | Undefined | Tag | Unary;
 
-export type Literal = {
-	typ: "Literal";
+export type Number = {
+	typ: "Number";
+	value: number;
+};
+
+export type String = {
+	typ: "String";
 	value: string;
 };
 
