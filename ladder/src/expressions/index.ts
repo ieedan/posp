@@ -11,7 +11,8 @@ export type Expression =
 	| Or
 	| Xor
 	| And
-	| Func;
+	| Func
+| Grouping;
 
 export type Number = {
 	typ: "Number";
@@ -69,3 +70,8 @@ export type Func = {
 	name: Token;
 	params: Expression[];
 };
+
+export type Grouping = {
+	typ: "Grouping",
+	expression: Expression;
+}

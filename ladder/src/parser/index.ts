@@ -497,6 +497,23 @@ const newParser = (): Parser => {
 				return Ok({ typ: "Undefined", token: _advance() });
 			}
 
+			if (_match("(")) {
+				_advance();
+				const expressionResult = _expression();
+
+				if (expressionResult.isErr()) {
+					return Err(expressionResult.unwrapErr());
+				}
+
+				const consumeRes = _consume(')', "'(' left unclosed.");
+
+				if (consumeRes.isErr()) {
+					return Err(consumeRes.unwrapErr())
+				}
+
+				return Ok({ typ: "Grouping", expression: expressionResult.unwrap() });
+			}
+
 			return Err({ error: "Expected expression!" });
 		};
 

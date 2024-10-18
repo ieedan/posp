@@ -6,8 +6,3 @@ A fully featured parser for Allen Bradley Studio 5000 ladder logic.
 
 - Expression Parsing
 - Simple AST
-
-## TODO
-
-- [ ] More robust parser
-- [ ] Show parser errors

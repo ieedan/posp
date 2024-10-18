@@ -8,13 +8,9 @@ const parser = p.new();
 Deno.test("Expect correct ast And", () => {
 	const input = "XIC(Tag)XIO(Tag2)OTE(Tag3);";
 
-	const [tokens, errors] = scanner.scan(input);
+	const tokens = scanner.scan(input);
 
-	if (errors != null) {
-		throw new Error(JSON.stringify(errors, null, 2));
-	}
-
-	const ast = parser.parse(tokens);
+	const ast = parser.parse(tokens.expect("This syntax is valid and should not fail."));
 
 	assertEquals(ast, [
 		{
@@ -70,18 +66,15 @@ Deno.test("Expect correct ast And", () => {
 			},
 		},
 	]);
+	assertEquals(parser.errors, null);
 });
 
 Deno.test("Expect correct ast Or", () => {
 	const input = "[XIC(Tag),XIO(Tag2)]OTE(Tag3);";
 
-	const [tokens, errors] = scanner.scan(input);
+	const tokens = scanner.scan(input);
 
-	if (errors != null) {
-		throw new Error(JSON.stringify(errors, null, 2));
-	}
-
-	const ast = parser.parse(tokens);
+	const ast = parser.parse(tokens.expect("This syntax is valid and should not fail."));
 
 	assertEquals(ast, [
 		{
@@ -142,18 +135,15 @@ Deno.test("Expect correct ast Or", () => {
 			},
 		},
 	]);
+	assertEquals(parser.errors, null);
 });
 
 Deno.test("Expect correct ast Nested Or", () => {
-	const input = "NOP()[[NOP(),NOP()][NOP,NOP()]];";
+	const input = "NOP()[[NOP(),NOP()][NOP(),NOP()]];";
 
-	const [tokens, errors] = scanner.scan(input);
+	const tokens = scanner.scan(input);
 
-	if (errors != null) {
-		throw new Error(JSON.stringify(errors, null, 2));
-	}
-
-	const ast = parser.parse(tokens);
+	const ast = parser.parse(tokens.expect("This syntax is valid and should not fail."));
 
 	assertEquals(ast, [
 		{
@@ -198,6 +188,12 @@ Deno.test("Expect correct ast Nested Or", () => {
 												name: "NOP",
 												parameters: [],
 											},
+											{
+												typ: "Instruction",
+												index: 4,
+												name: "NOP",
+												parameters: [],
+											},
 										],
 									},
 								],
@@ -208,4 +204,5 @@ Deno.test("Expect correct ast Nested Or", () => {
 			},
 		},
 	]);
+	assertEquals(parser.errors, null);
 });

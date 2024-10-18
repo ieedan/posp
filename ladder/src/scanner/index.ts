@@ -9,12 +9,12 @@ type Error = {
 };
 
 type Scanner = {
-	scan: (code: string) => Result<Token[], string[] | null>;
+	scan: (code: string) => Result<Token[], Error[] | null>;
 };
 
 /** Creates a new scanner instance  */
 const newScanner = (): Scanner => {
-	const scan = (code: string): Result<Token[], string[] | null> => {
+	const scan = (code: string): Result<Token[], Error[] | null> => {
 		let i = 0;
 		const tokens: Token[] = [];
 		let errors: Error[] | null = null;
@@ -40,12 +40,12 @@ const newScanner = (): Scanner => {
 			return prev;
 		};
 
-		const _consume = (match: string): number | undefined => {
-			while (!_isAtEnd()) {
-				if (_advance() === match) {
-					return i;
-				}
+		const _consume = (match: string, message: string): Result<string, Error> => {
+			if (_peek() === match) {
+				return Ok(_advance());
 			}
+
+			return Err({ error: message, startColumn: i, endColumn: i });
 		};
 
 		const _peek = () => code[i];
@@ -107,10 +107,8 @@ const newScanner = (): Scanner => {
 							lexeme: instruction,
 						});
 
-						const end = _consume("(");
-
-						if (end == undefined) {
-							_error(`Unexpected token '${_peek()}'`, i);
+						if (_consume("(", "Expected '(' after instruction.").isErr()) {
+							_error("Expected '(' after instruction", i);
 							_advance();
 							continue;
 						} else {
@@ -158,22 +156,6 @@ const newScanner = (): Scanner => {
 										break;
 									}
 
-									break;
-								case "[":
-									tokens.push({
-										typ: "[",
-										column: i,
-										lexeme: "[",
-									});
-									_advance();
-									break;
-								case "]":
-									tokens.push({
-										typ: "]",
-										column: i,
-										lexeme: "]",
-									});
-									_advance();
 									break;
 								case " ":
 									// strip whitespace
@@ -307,9 +289,11 @@ const newScanner = (): Scanner => {
 									const s = i;
 									_advance();
 
-									const end = _consume("'");
+									while (!_isAtEnd() && _peek() !== "'") {
+										_advance();
+									}
 
-									if (!end) {
+									if (_isAtEnd() && _peek() !== "'") {
 										_error("Unclosed string literal!", i);
 										break;
 									}
