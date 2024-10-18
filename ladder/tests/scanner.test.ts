@@ -62,7 +62,11 @@ Deno.test("Expect correct syntax error", () => {
 
 	const tokens = scanner.scan(input);
 
-	assertEquals(tokens.unwrapErr(), [{ error: "Expected '(' after instruction", startColumn: 3, endColumn: 3 }]);
+	assertEquals(tokens.unwrapErr(), [{
+		error: "Expected '(' after instruction",
+		startColumn: 3,
+		endColumn: 3,
+	}]);
 });
 
 Deno.test("Expect correct syntax error", () => {

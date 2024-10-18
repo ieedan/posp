@@ -1,5 +1,10 @@
 import { EXPRESSION_KEYWORDS, type Token } from "./tokens.ts";
-import { isAlpha, isAlphaNumeric, isNumber, isValidForTagBody } from "../utils/index.ts";
+import {
+	isAlpha,
+	isAlphaNumeric,
+	isNumber,
+	isValidForTagBody,
+} from "../utils/index.ts";
 import { Err, Ok, type Result } from "../blocks/index.ts";
 
 type Error = {
@@ -40,7 +45,10 @@ const newScanner = (): Scanner => {
 			return prev;
 		};
 
-		const _consume = (match: string, message: string): Result<string, Error> => {
+		const _consume = (
+			match: string,
+			message: string,
+		): Result<string, Error> => {
 			if (_peek() === match) {
 				return Ok(_advance());
 			}
@@ -107,7 +115,10 @@ const newScanner = (): Scanner => {
 							lexeme: instruction,
 						});
 
-						if (_consume("(", "Expected '(' after instruction.").isErr()) {
+						if (
+							_consume("(", "Expected '(' after instruction.")
+								.isErr()
+						) {
 							_error("Expected '(' after instruction", i);
 							_advance();
 							continue;
@@ -309,7 +320,10 @@ const newScanner = (): Scanner => {
 								}
 								default: {
 									// when referencing a program parameter tags are prefixed with '\'
-									if (isAlpha(_peek()) || _peek() == "_" || _peek() == "\\") {
+									if (
+										isAlpha(_peek()) || _peek() == "_" ||
+										_peek() == "\\"
+									) {
 										const s = i;
 										_advance();
 
@@ -340,7 +354,10 @@ const newScanner = (): Scanner => {
 											_advance();
 										}
 
-										if (_peek() == "." && isNumber(_peekNext())) {
+										if (
+											_peek() == "." &&
+											isNumber(_peekNext())
+										) {
 											_advance();
 
 											while (isNumber(_peek())) {
@@ -356,7 +373,10 @@ const newScanner = (): Scanner => {
 											lexeme: num,
 										});
 									} else {
-										_error(`Unexpected token '${_peek()}'!`, i);
+										_error(
+											`Unexpected token '${_peek()}'!`,
+											i,
+										);
 										_advance();
 									}
 									break;

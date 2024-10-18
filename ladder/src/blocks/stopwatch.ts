@@ -102,7 +102,7 @@ const stopwatch = (): Stopwatch => {
 		elapsed: () => {
 			// if this hasn't been defined its always an error in the users code
 			if (!startedAt) {
-				throw new Error('Call `.start()` first!');
+				throw new Error("Call `.start()` first!");
 			}
 
 			let tempEndedAt = endedAt;

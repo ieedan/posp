@@ -12,7 +12,7 @@ export type Expression =
 	| Xor
 	| And
 	| Func
-| Grouping;
+	| Grouping;
 
 export type Number = {
 	typ: "Number";
@@ -72,6 +72,6 @@ export type Func = {
 };
 
 export type Grouping = {
-	typ: "Grouping",
+	typ: "Grouping";
 	expression: Expression;
-}
+};

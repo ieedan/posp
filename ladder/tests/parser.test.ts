@@ -10,7 +10,9 @@ Deno.test("Expect correct ast And", () => {
 
 	const tokens = scanner.scan(input);
 
-	const ast = parser.parse(tokens.expect("This syntax is valid and should not fail."));
+	const ast = parser.parse(
+		tokens.expect("This syntax is valid and should not fail."),
+	);
 
 	assertEquals(ast, [
 		{
@@ -74,7 +76,9 @@ Deno.test("Expect correct ast Or", () => {
 
 	const tokens = scanner.scan(input);
 
-	const ast = parser.parse(tokens.expect("This syntax is valid and should not fail."));
+	const ast = parser.parse(
+		tokens.expect("This syntax is valid and should not fail."),
+	);
 
 	assertEquals(ast, [
 		{
@@ -143,7 +147,9 @@ Deno.test("Expect correct ast Nested Or", () => {
 
 	const tokens = scanner.scan(input);
 
-	const ast = parser.parse(tokens.expect("This syntax is valid and should not fail."));
+	const ast = parser.parse(
+		tokens.expect("This syntax is valid and should not fail."),
+	);
 
 	assertEquals(ast, [
 		{
