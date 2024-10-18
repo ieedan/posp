@@ -32,6 +32,10 @@ if (import.meta.main) {
 
 	const time = w.elapsed();
 
+	if (parser.errors) {
+		console.log("parser errors: ", parser.errors);
+	}
+
 	// display after time
 
 	console.log("");

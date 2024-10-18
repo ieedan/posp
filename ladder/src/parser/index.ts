@@ -5,6 +5,8 @@ import type { Expression } from "../expressions/index.ts";
 
 type Parser = {
 	parse: (tokens: Token[]) => Rung[];
+	/** Returns the errors (if any) for the most recent parser pass. */
+	errors: Error[] | null;
 };
 
 type Error = {
@@ -14,7 +16,9 @@ type Error = {
 const newEmptyRung = (): Rung => ({ logic: { typ: "And", conditions: [] } });
 
 const newParser = (): Parser => {
+	let errors: Error[] | null = null;
 	const parse = (tokens: Token[]) => {
+		errors = null;
 		const rungs: Rung[] = [];
 
 		let i = 0;
@@ -32,10 +36,7 @@ const newParser = (): Parser => {
 			return prev;
 		};
 
-		const _consume = (
-			match: Token["typ"],
-			message: string,
-		): Result<Token, Error> => {
+		const _consume = (match: Token["typ"], message: string): Result<Token, Error> => {
 			if (_peek().typ === match) {
 				return Ok(_advance());
 			}
@@ -45,8 +46,7 @@ const newParser = (): Parser => {
 
 		const _peek = () => tokens[i];
 
-		const _match = (...mat: Token["typ"][]): boolean =>
-			mat.includes(_peek().typ);
+		const _match = (...mat: Token["typ"][]): boolean => mat.includes(_peek().typ);
 
 		const _and = (): Result<Branch, Error> => {
 			const instructionRes = _instruction();
@@ -82,10 +82,7 @@ const newParser = (): Parser => {
 
 				while (!_isAtEnd() && !_match("]")) {
 					if (branches.length > 0) {
-						const consumeRes = _consume(
-							",",
-							"Expected ',' before next condition.",
-						);
+						const consumeRes = _consume(",", "Expected ',' before next condition.");
 
 						if (consumeRes.isErr()) {
 							return Err(consumeRes.unwrapErr());
@@ -168,10 +165,7 @@ const newParser = (): Parser => {
 
 				const parameters: Expression[] = [];
 
-				const consumeRes = _consume(
-					"(",
-					"Expected '(' before expression parameters.",
-				);
+				const consumeRes = _consume("(", "Expected '(' before expression parameters.");
 
 				if (consumeRes.isErr()) {
 					return Err(consumeRes.unwrapErr());
@@ -179,10 +173,7 @@ const newParser = (): Parser => {
 
 				while (!_isAtEnd() && !_match(")")) {
 					if (parameters.length > 0) {
-						const consumeRes = _consume(
-							",",
-							"Expected ',' after parameter.",
-						);
+						const consumeRes = _consume(",", "Expected ',' after parameter.");
 
 						if (consumeRes.isErr()) {
 							return Err(consumeRes.unwrapErr());
@@ -454,10 +445,7 @@ const newParser = (): Parser => {
 
 				while (!_isAtEnd() && !_match(")")) {
 					if (params.length > 0) {
-						const consumeRes = _consume(
-							",",
-							"Expected ',' after parameter.",
-						);
+						const consumeRes = _consume(",", "Expected ',' after parameter.");
 
 						if (consumeRes.isErr()) {
 							return Err(consumeRes.unwrapErr());
@@ -555,7 +543,18 @@ const newParser = (): Parser => {
 				(branch) => {
 					currentRung.logic.conditions.push(branch);
 				},
-				() => {},
+				(err) => {
+					if (errors == null) {
+						errors = [];
+					}
+
+					errors.push(err);
+
+					// try to recover from the error
+					while (!_isAtEnd() && _match(")", "]", ";")) {
+						_advance();
+					}
+				}
 			);
 		}
 
@@ -564,6 +563,9 @@ const newParser = (): Parser => {
 
 	return {
 		parse,
+		get errors() {
+			return errors;
+		},
 	};
 };
 
